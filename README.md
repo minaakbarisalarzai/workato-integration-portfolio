@@ -70,7 +70,7 @@ The connector rejects unsupported values and provides descriptive error messages
 
 | Project | Technical Focus | Status |
 |---|---|---|
-| [01 · Loop Control Patterns](projects/01-loop-control/) | Conditional iteration, control-flow behavior, and edge-case handling | Planned |
+| [01 · Connection Failure Detection & Automated Job Recovery](projects/01-connection-failure-recovery/) | Workato recipe monitoring, connection-related failure investigation, batch job replay, and recovery logging | Implemented — Verification Ongoing |
 | [02 · Recipe Optimization](projects/02-recipe-optimization/) | Reducing unnecessary scripting with native Workato formulas | Planned |
 | [03 · GitHub Issue Explorer — Custom Connector](projects/03-custom-connector/) | Ruby SDK, GitHub REST API, authentication, pagination, validation, and testing | **Implemented — Core Tested** |
 | [04 · Embedded Integration Architecture](projects/04-embedded-integration/) | Reference architecture for workspace provisioning, secure embedding, and permissions | Planned |
