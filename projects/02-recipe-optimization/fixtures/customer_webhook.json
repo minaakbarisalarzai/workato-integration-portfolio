@@ -1,0 +1,8 @@
+{
+  "payload": {
+    "customer_id": 12345,
+    "name": "Sara Khan",
+    "email": "sara@example.com",
+    "status": "active"
+  }
+}
