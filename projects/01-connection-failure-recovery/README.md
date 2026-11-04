@@ -41,14 +41,13 @@ These three screenshots are consecutive views of **the same Workato recipe**.
 
 ## Recipe definition
 
-[`recipe/recipe_export_SANITIZED_REFERENCE.json`](recipe/recipe_export_SANITIZED_REFERENCE.json) is a **redacted reference copy** of the original Workato recipe definition, not an import-ready deployment artifact. Connection assignments, spreadsheet identifiers, and fixed search dates have been replaced with demonstration values. It needs explicit configuration and safety review before any use.
+[`recipe/recipe_export_SANITIZED_REFERENCE.json`](recipe/recipe_export_SANITIZED_REFERENCE.json) is a **redacted reference copy** of the original Workato recipe definition, not an import-ready deployment artifact. Connection assignments, spreadsheet identifiers, and fixed search dates have been replaced with demonstration values. 
 
 ## Operational safeguards and limitations
 
 - A matching connection and `failed` status do **not** establish that a job failed because of a connection outage.
 - Recovery should verify connection health and classify the failure before replaying it.
 - Rerunning a job may duplicate side effects from earlier successful steps. Use approval or idempotency controls where necessary.
-- Avoid selecting the same failed jobs on consecutive scheduled runs; durable replay tracking may be required.
 - Set an accurate outage window and enforce per-recipe batch limits before executing reruns.
 - Preserve an audit trail that differentiates a rerun request from successful completion of the rerun job.
 
@@ -66,7 +65,3 @@ The example export is included for **technical review**, not unattended producti
     ├── 02-workflow-continuation.png
     └── 03-workflow-completion.png
 ```
-
-## Confidentiality
-
-This is a portfolio representation of a Workato workflow. Confirm authorization to share screenshots and workflow logic from any employer-managed environment before publishing. Screenshots must also be checked for internal workspace, account, job, connection, or spreadsheet details. The original export is not included.
