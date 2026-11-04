@@ -1,0 +1,15 @@
+[
+  {
+    "number": 17, "title": "Demo bug", "state": "open",
+    "html_url": "https://github.com/octocat/Hello-World/issues/17",
+    "created_at": "2026-10-01T10:00:00Z", "updated_at": "2026-10-02T10:00:00Z",
+    "user": { "login": "octocat" },
+    "labels": [{ "name": "bug" }]
+  },
+  {
+    "number": 18, "title": "Demo PR", "state": "open",
+    "html_url": "https://github.com/octocat/Hello-World/pull/18",
+    "user": { "login": "octocat" }, "pull_request": { "url": "https://api.github.com/repos/octocat/Hello-World/pulls/18" },
+    "labels": []
+  }
+]
