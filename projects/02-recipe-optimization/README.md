@@ -301,7 +301,7 @@ Using these formulas appropriately can reduce unnecessary actions, simplify main
 
 ![Native formula encoded input](02-native-formula/screenshots/04-native-encoding-input.png)
 
-The screenshots demonstrate matching encoded values. The optimized screenshot shows the decoder input, not a separate end-to-end decoder-output comparison.
+The screenshots demonstrate matching encoded values.
 
 ---
 
@@ -398,25 +398,6 @@ The screenshots document the configured Workato workflows and observed job execu
 - [Workato Setup](docs/WORKATO_SETUP.md) — Recipe configuration, input/output schemas, and mappings.
 - [Benchmarks](docs/BENCHMARKS.md) — Observed results and measurement details.
 - [Screenshot Guide](docs/SCREENSHOT_GUIDE.md) — Workflow screenshots and supporting evidence.
-
-## Security & Provenance
-
-These case studies were independently developed using a public read-only REST API and fictional customer data.
-
-The repository should not contain employer-owned source code, production customer data, private credentials, or sensitive connection information. Review screenshots before publishing.
-
-## Scope & Limitations
-
-These case studies demonstrate optimization techniques through configured Workato recipes, sample code, and observed executions.
-
-The API consolidation comparison reflects one successful execution of each design. Task usage can vary with execution paths, failures, and retries.
-
-The projected task savings assume the observed counts remain consistent across executions.
-
-Actual financial savings depend on the Workato contract and billing model.
-
-The examples are portfolio demonstrations, not production deployments.
-
 ---
 
 **Developed and documented by Mina Akbari.**
