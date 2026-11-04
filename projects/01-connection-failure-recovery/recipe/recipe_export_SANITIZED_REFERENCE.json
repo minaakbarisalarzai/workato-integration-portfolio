@@ -1,0 +1,807 @@
+{
+  "name": "Workato Connection Failure Detection & Automated Job Recovery",
+  "description": "",
+  "version": 4,
+  "private": true,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "clock",
+    "name": "scheduled_event",
+    "as": "505b261e",
+    "keyword": "trigger",
+    "input": {
+      "time_unit": "minutes",
+      "trigger_every": "5"
+    },
+    "extended_input_schema": [
+      {
+        "control_type": "integer",
+        "default": "5",
+        "enforce_template_mode": true,
+        "extends_schema": true,
+        "hint": "Define repeating schedule. Enter whole numbers only.\n                        This field can be set to a minimum of 5 minutes.",
+        "label": "Trigger every",
+        "name": "trigger_every",
+        "optional": false,
+        "suffix": {
+          "text": "minutes"
+        },
+        "type": "string"
+      },
+      {
+        "control_type": "select",
+        "hint": "Select the timezone to use. Leave it blank to use <b>{{authUser.account_timezone}}</b>",
+        "label": "Timezone",
+        "name": "timezone",
+        "optional": true,
+        "pick_list": "timezone_id_global_pick_list",
+        "pick_list_connection_less": true,
+        "type": "string"
+      },
+      {
+        "control_type": "date_time",
+        "enforce_template_mode": true,
+        "extends_schema": true,
+        "hint": "Set date and time to start or leave blank to start immediately. <b>Once recipe has been run or tested, value cannot be changed.</b>",
+        "label": "Start after",
+        "name": "start_after",
+        "optional": true,
+        "parse_output": "date_time_conversion",
+        "since_field": true,
+        "type": "date_time",
+        "ignore_timezone": true,
+        "render_input": "date_time_conversion"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "provider": "workato_app",
+        "name": "search_recipes_v2",
+        "as": "cca5bbc7",
+        "keyword": "action",
+        "dynamicPickListSelection": {
+          "recipe_id": "hg"
+        },
+        "input": {
+          "status": "all"
+        },
+        "visible_config_fields": [
+          "status",
+          "connection_id"
+        ],
+        "comment": "Search all recipes inside the workspace.",
+        "uuid": "REDACTED-EXAMPLE-ID",
+        "skip": false
+      },
+      {
+        "number": 2,
+        "as": "cf9c5c77",
+        "keyword": "foreach",
+        "repeat_mode": "simple",
+        "clear_scope": "false",
+        "input": {},
+        "block": [
+          {
+            "number": 3,
+            "provider": "workato_app",
+            "name": "search_connections",
+            "as": "8e48e13d",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "recipe_id": "hg",
+              "provider": "MySQL"
+            },
+            "toggleCfg": {
+              "recipe_id": false
+            },
+            "input": {
+              "provider": "mysql",
+              "recipe_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"id\"]}')}"
+            },
+            "comment": "Filter by connection (e.g selected connector)",
+            "uuid": "REDACTED-EXAMPLE-ID",
+            "skip": false
+          },
+          {
+            "number": 4,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "greater_than",
+                  "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_app\",\"line\":\"8e48e13d\",\"path\":[\"connections\"]}').length",
+                  "rhs": "0",
+                  "uuid": "REDACTED-EXAMPLE-ID"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 5,
+                "provider": "workato_app",
+                "name": "list_jobs",
+                "as": "525d2d10",
+                "keyword": "action",
+                "toggleCfg": {
+                  "recipe_id": false
+                },
+                "input": {
+                  "status": "failed",
+                  "recipe_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"id\"]}')}",
+                  "started_at_from": "2026-01-01T00:00:00Z",
+                  "started_at_to": "2026-01-01T01:00:00Z"
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Jobs",
+                    "name": "jobs",
+                    "of": "object",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Job ID",
+                        "type": "string",
+                        "name": "id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Original Job ID",
+                        "type": "string",
+                        "name": "master_job_id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Recipe ID",
+                        "parse_output": "integer_conversion",
+                        "type": "integer",
+                        "name": "recipe_id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Calling job ID",
+                        "type": "string",
+                        "name": "calling_job_id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Calling recipe ID",
+                        "parse_output": "integer_conversion",
+                        "type": "integer",
+                        "name": "calling_recipe_id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Root recipe ID",
+                        "parse_output": "integer_conversion",
+                        "type": "integer",
+                        "name": "root_recipe_id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Root job ID",
+                        "type": "string",
+                        "name": "root_job_id"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Title",
+                        "type": "string",
+                        "name": "title"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "type": "string",
+                        "name": "status"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Is repeat",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Is repeat",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "type": "boolean",
+                          "name": "is_repeat"
+                        },
+                        "type": "boolean",
+                        "name": "is_repeat"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Is test",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Is test",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "type": "boolean",
+                          "name": "is_test"
+                        },
+                        "type": "boolean",
+                        "name": "is_test"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Started at",
+                        "render_input": "date_time_conversion",
+                        "parse_output": "date_time_conversion",
+                        "type": "date_time",
+                        "name": "started_at"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Completed at",
+                        "render_input": "date_time_conversion",
+                        "parse_output": "date_time_conversion",
+                        "type": "date_time",
+                        "name": "completed_at"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Repeat count",
+                        "parse_output": "integer_conversion",
+                        "type": "integer",
+                        "name": "repeat_count"
+                      },
+                      {
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Error ID",
+                            "type": "string",
+                            "name": "error_id"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error type",
+                            "type": "string",
+                            "name": "error_type"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error type ID",
+                            "optional": true,
+                            "type": "string",
+                            "name": "error_type_id"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error at",
+                            "render_input": "date_time_conversion",
+                            "parse_output": "date_time_conversion",
+                            "type": "date_time",
+                            "name": "error_at"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Errored app",
+                            "type": "string",
+                            "name": "adapter"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Errored action",
+                            "type": "string",
+                            "name": "action"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Errored step number",
+                            "parse_output": "integer_conversion",
+                            "type": "integer",
+                            "name": "line_number"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "type": "string",
+                            "name": "message"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Inner message",
+                            "type": "string",
+                            "name": "inner_message"
+                          },
+                          {
+                            "properties": [
+                              {
+                                "control_type": "text",
+                                "label": "HTTP protocol version",
+                                "optional": true,
+                                "type": "string",
+                                "name": "protocol"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "HTTP status code",
+                                "parse_output": "integer_conversion",
+                                "optional": true,
+                                "type": "integer",
+                                "name": "code"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "HTTP status text (exactly as received from the server; not present for HTTP/2 or later)",
+                                "optional": true,
+                                "type": "string",
+                                "name": "raw_status_text"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "HTTP status text (RFC normalized)",
+                                "optional": true,
+                                "type": "string",
+                                "name": "normalized_status_text"
+                              },
+                              {
+                                "label": "HTTP response headers (normalized)",
+                                "optional": true,
+                                "of": "object",
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "Name",
+                                    "type": "string",
+                                    "name": "name"
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Value",
+                                    "type": "string",
+                                    "name": "value"
+                                  }
+                                ],
+                                "type": "array",
+                                "name": "normalized_headers"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "HTTP response body",
+                                "optional": true,
+                                "type": "string",
+                                "name": "body"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Retry after (seconds)",
+                                "parse_output": "integer_conversion",
+                                "optional": true,
+                                "type": "integer",
+                                "name": "retry_after"
+                              },
+                              {
+                                "properties": [],
+                                "label": "HTTP response headers",
+                                "optional": true,
+                                "type": "object",
+                                "name": "headers"
+                              }
+                            ],
+                            "label": "HTTP error",
+                            "optional": true,
+                            "type": "object",
+                            "name": "http_response"
+                          }
+                        ],
+                        "label": "Error",
+                        "type": "object",
+                        "name": "error"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Flow ID",
+                        "parse_output": "integer_conversion",
+                        "deprecated": true,
+                        "type": "integer",
+                        "name": "flow_id"
+                      }
+                    ],
+                    "type": "array"
+                  }
+                ],
+                "visible_config_fields": [
+                  "recipe_id",
+                  "status",
+                  "started_at_from",
+                  "started_at_to"
+                ],
+                "comment": "Please update \"Jobs created since\" and \"Jobs created till\" to match the start date/time and end date/time of connection disconnection.",
+                "uuid": "REDACTED-EXAMPLE-ID",
+                "skip": false
+              },
+              {
+                "number": 6,
+                "as": "9121a784",
+                "keyword": "foreach",
+                "repeat_mode": "simple",
+                "clear_scope": "false",
+                "input": {},
+                "block": [
+                  {
+                    "number": 7,
+                    "keyword": "if",
+                    "input": {
+                      "type": "compound",
+                      "operand": "and",
+                      "conditions": [
+                        {
+                          "operand": "equals_to",
+                          "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"9121a784\",\"path\":[\"status\"]}')}",
+                          "rhs": "failed",
+                          "uuid": "REDACTED-EXAMPLE-ID"
+                        }
+                      ]
+                    },
+                    "block": [
+                      {
+                        "number": 8,
+                        "keyword": "try",
+                        "input": {},
+                        "block": [
+                          {
+                            "number": 9,
+                            "provider": "workato_app",
+                            "name": "rerun_jobs",
+                            "as": "0ff63213",
+                            "keyword": "action",
+                            "toggleCfg": {
+                              "recipe_id": false
+                            },
+                            "input": {
+                              "recipe_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"id\"]}')}",
+                              "jobs": {
+                                "job_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"9121a784\",\"path\":[\"id\"]}')}"
+                              }
+                            },
+                            "uuid": "REDACTED-EXAMPLE-ID",
+                            "skip": false
+                          },
+                          {
+                            "number": 10,
+                            "provider": "google_sheets",
+                            "name": "add_spreadsheet_row_v4",
+                            "as": "751d4ba7",
+                            "keyword": "action",
+                            "dynamicPickListSelection": {
+                              "spreadsheet": "Sample recovery audit"
+                            },
+                            "toggleCfg": {
+                              "is_top_left": true
+                            },
+                            "input": {
+                              "team_drives": "my_drive",
+                              "is_top_left": "false",
+                              "spreadsheet": "CONFIGURE_YOUR_OWN_SHEET",
+                              "sheet": "Recovery Audit",
+                              "data": {
+                                "col_1": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"id\"]}')}",
+                                "col_2": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"name\"]}')}",
+                                "col_3": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_app\",\"line\":\"525d2d10\",\"path\":[\"jobs\",{\"path_element_type\":\"current_item\"},\"id\"]}')}",
+                                "col_4": "Yes",
+                                "col_5": "=now"
+                              }
+                            },
+                            "extended_input_schema": [
+                              {
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "hint": "Select a sheet to add row to. The sheet must have at least one header row. <a href='REDACTED_URL target='_blank'>Learn more</a>",
+                                "label": "Sheet",
+                                "name": "sheet",
+                                "optional": false,
+                                "pick_list": [
+                                  [
+                                    "Recipes with SQL Connection",
+                                    "Recipes with SQL Connection"
+                                  ],
+                                  [
+                                    "All Recipes",
+                                    "All Recipes"
+                                  ],
+                                  [
+                                    "Successful re-running Jobs",
+                                    "Successful re-running Jobs"
+                                  ],
+                                  [
+                                    "Failed Re-running jobs",
+                                    "Failed Re-running jobs"
+                                  ]
+                                ],
+                                "toggle_field": {
+                                  "control_type": "text",
+                                  "label": "Sheet name",
+                                  "toggle_hint": "Use sheet name",
+                                  "extends_schema": true,
+                                  "change_on_blur": true,
+                                  "toggle_to_secondary_hint": "Use sheet name",
+                                  "toggle_to_primary_hint": "Select a sheet",
+                                  "hint": "Use <b>Sheet name</b> pill from the output of other Google Sheets’ triggers/actions. Or enter sheet name manually. The sheet must have at least 1 header row in input field.",
+                                  "type": "string",
+                                  "name": "sheet_name"
+                                },
+                                "toggle_hint": "Select a sheet",
+                                "type": "string"
+                              },
+                              {
+                                "hint": "Input values of the new row.",
+                                "label": "Columns",
+                                "name": "data",
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "Recipe ID",
+                                    "sticky": true,
+                                    "optional": true,
+                                    "type": "string",
+                                    "name": "col_1"
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Recipe Name",
+                                    "sticky": true,
+                                    "optional": true,
+                                    "type": "string",
+                                    "name": "col_2"
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Job ID",
+                                    "sticky": true,
+                                    "optional": true,
+                                    "type": "string",
+                                    "name": "col_3"
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Repeated Job",
+                                    "sticky": true,
+                                    "optional": true,
+                                    "type": "string",
+                                    "name": "col_4"
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Date",
+                                    "sticky": true,
+                                    "optional": true,
+                                    "type": "string",
+                                    "name": "col_5"
+                                  }
+                                ],
+                                "type": "object"
+                              }
+                            ],
+                            "comment": "Add the successful run here.",
+                            "uuid": "REDACTED-EXAMPLE-ID",
+                            "skip": false
+                          },
+                          {
+                            "number": 11,
+                            "as": "34e46048",
+                            "keyword": "catch",
+                            "input": {
+                              "max_retry_count": "0",
+                              "retry_interval": "2"
+                            },
+                            "block": [
+                              {
+                                "number": 12,
+                                "provider": "google_sheets",
+                                "name": "add_spreadsheet_row_v4",
+                                "as": "f4ea974d",
+                                "keyword": "action",
+                                "dynamicPickListSelection": {
+                                  "spreadsheet": "Sample recovery audit"
+                                },
+                                "toggleCfg": {
+                                  "is_top_left": true
+                                },
+                                "input": {
+                                  "team_drives": "my_drive",
+                                  "is_top_left": "false",
+                                  "spreadsheet": "CONFIGURE_YOUR_OWN_SHEET",
+                                  "sheet": "Recovery Audit",
+                                  "data": {
+                                    "col_1": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"id\"]}')}",
+                                    "col_2": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"foreach\",\"line\":\"cf9c5c77\",\"path\":[\"name\"]}')}",
+                                    "col_3": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_app\",\"line\":\"525d2d10\",\"path\":[\"jobs\",{\"path_element_type\":\"current_item\"},\"id\"]}')}",
+                                    "col_4": "No",
+                                    "col_5": "=now"
+                                  }
+                                },
+                                "extended_input_schema": [
+                                  {
+                                    "control_type": "select",
+                                    "extends_schema": true,
+                                    "hint": "Select a sheet to add row to. The sheet must have at least one header row. <a href='REDACTED_URL target='_blank'>Learn more</a>",
+                                    "label": "Sheet",
+                                    "name": "sheet",
+                                    "optional": false,
+                                    "pick_list": [
+                                      [
+                                        "Recipes with SQL Connection",
+                                        "Recipes with SQL Connection"
+                                      ],
+                                      [
+                                        "All Recipes",
+                                        "All Recipes"
+                                      ],
+                                      [
+                                        "Successful re-running Jobs",
+                                        "Successful re-running Jobs"
+                                      ],
+                                      [
+                                        "Failed Re-running jobs",
+                                        "Failed Re-running jobs"
+                                      ]
+                                    ],
+                                    "toggle_field": {
+                                      "control_type": "text",
+                                      "label": "Sheet name",
+                                      "toggle_hint": "Use sheet name",
+                                      "extends_schema": true,
+                                      "change_on_blur": true,
+                                      "toggle_to_secondary_hint": "Use sheet name",
+                                      "toggle_to_primary_hint": "Select a sheet",
+                                      "hint": "Use <b>Sheet name</b> pill from the output of other Google Sheets’ triggers/actions. Or enter sheet name manually. The sheet must have at least 1 header row in input field.",
+                                      "type": "string",
+                                      "name": "sheet_name"
+                                    },
+                                    "toggle_hint": "Select a sheet",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "hint": "Input values of the new row.",
+                                    "label": "Columns",
+                                    "name": "data",
+                                    "properties": [
+                                      {
+                                        "control_type": "text",
+                                        "label": "Recipe ID",
+                                        "sticky": true,
+                                        "optional": true,
+                                        "type": "string",
+                                        "name": "col_1"
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Recipe Name",
+                                        "sticky": true,
+                                        "optional": true,
+                                        "type": "string",
+                                        "name": "col_2"
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Job ID",
+                                        "sticky": true,
+                                        "optional": true,
+                                        "type": "string",
+                                        "name": "col_3"
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Repeated Job",
+                                        "sticky": true,
+                                        "optional": true,
+                                        "type": "string",
+                                        "name": "col_4"
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Date",
+                                        "sticky": true,
+                                        "optional": true,
+                                        "type": "string",
+                                        "name": "col_5"
+                                      }
+                                    ],
+                                    "type": "object"
+                                  }
+                                ],
+                                "comment": "Add the re-run failed jobs here.",
+                                "uuid": "REDACTED-EXAMPLE-ID",
+                                "skip": false
+                              }
+                            ],
+                            "uuid": "REDACTED-EXAMPLE-ID",
+                            "skip": false
+                          }
+                        ],
+                        "uuid": "REDACTED-EXAMPLE-ID",
+                        "skip": false
+                      }
+                    ],
+                    "uuid": "REDACTED-EXAMPLE-ID",
+                    "skip": false
+                  }
+                ],
+                "source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_app\",\"line\":\"525d2d10\",\"path\":[\"jobs\"]}')}",
+                "uuid": "REDACTED-EXAMPLE-ID",
+                "skip": false
+              },
+              {
+                "number": 13,
+                "keyword": "else",
+                "input": {},
+                "block": [
+                  {
+                    "number": 14,
+                    "provider": "logger",
+                    "name": "log_message",
+                    "as": "3e6ede54",
+                    "keyword": "action",
+                    "input": {
+                      "user_logs_enabled": "false",
+                      "message": "No MySQL connection was found."
+                    },
+                    "extended_input_schema": [
+                      {
+                        "control_type": "switch",
+                        "default": false,
+                        "disable_formula": true,
+                        "extends_schema": true,
+                        "hint": "Send a copy of the message to Workato logs.\n<a href=\"REDACTED_URL\" target=\"_blank\" class=\"ng-scope\">\n  Learn more\n</a>\n",
+                        "label": "Send to Workato log service",
+                        "name": "user_logs_enabled",
+                        "optional": true,
+                        "type": "string"
+                      }
+                    ],
+                    "uuid": "REDACTED-EXAMPLE-ID",
+                    "skip": false
+                  }
+                ],
+                "uuid": "REDACTED-EXAMPLE-ID",
+                "skip": false
+              }
+            ],
+            "uuid": "REDACTED-EXAMPLE-ID",
+            "skip": false
+          }
+        ],
+        "source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_app\",\"line\":\"cca5bbc7\",\"path\":[\"recipes\"]}')}",
+        "uuid": "REDACTED-EXAMPLE-ID",
+        "skip": false
+      }
+    ],
+    "uuid": "REDACTED-EXAMPLE-ID"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_app",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "clock",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "google_sheets",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

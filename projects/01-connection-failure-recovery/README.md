@@ -1,271 +1,72 @@
-
 # Workato Connection Failure Detection & Automated Job Recovery
 
 **Author:** Mina Akbari  
 **Platform:** Workato  
-**Focus:** Integration Reliability · Job Recovery · Workflow Automation
+**Focus:** Internal integration operations, failed-job investigation, batch replay, and recovery logging
 
-## Overview
+## Why this matters
 
-This project demonstrates a Workato recipe designed to automate
-the identification and recovery of integration jobs affected by
-connection-related failures.
+When an external connection is temporarily unavailable, multiple integration jobs can fail. Locating affected recipes, reviewing their job histories, and initiating reruns individually takes time and increases operational effort. This Workato recipe brings those activities into one operational workflow.
 
-In addition to building integrations between applications,
-integration engineers must ensure that existing integrations
-remain reliable and recoverable when failures occur.
+## The process
 
-This workflow addresses that operational challenge using
-Workato's built-in actions, conditional logic, batch processing,
-error handling, and logging capabilities.
+1. **Run every five minutes.** Start a scheduled inspection.
+2. **Discover recipes.** Search for recipes in the workspace and iterate over the results.
+3. **Look up connections.** Search connections for each recipe using a configured connector filter. The source example uses a MySQL filter; it is not a universal connection-outage detector.
+4. **Inspect execution history.** Request jobs for the recipe in a configured time window, filtered for failed status.
+5. **Evaluate failed jobs.** Follow the failed-job condition and invoke Workato's **Rerun specified jobs** action.
+6. **Record results.** Use Google Sheets to record recovery-action outcomes, with a Monitor branch, Do Not Retry handling, and fallback logging.
 
-## The Problem — Why This Matters
+## Result and value
 
-Enterprise integrations depend on connections to external
-systems, APIs, and services.
+The configured recipe demonstrates how Workato can automate **operational tasks within Workato itself**, not just integrations between external systems. It consolidates recipe discovery, connection lookup, failed-job inspection, rerun initiation, and logging into one workflow. This can reduce manual navigation and provide a more consistent response to a disruption.
 
-When a connection becomes unavailable, multiple Workato jobs
-may fail during the outage. Even after connectivity is restored,
-those failed jobs may still require manual intervention.
+**Verification scope:** The screenshots and sanitized recipe export establish the workflow configuration. They do not independently demonstrate successful recovery across a real outage, quantified time savings, or that every selected failure was connection-related. No such numbers are claimed.
 
-Without automation, an integration engineer may need to:
+## Recipe walkthrough (one continuous recipe)
 
-1. Identify recipes using the affected connection.
-2. Search each recipe's execution history.
-3. Locate jobs that failed during the disruption.
-4. Rerun the affected jobs individually.
-5. Track successful reruns and investigate recovery failures.
+These three screenshots are consecutive views of **the same Workato recipe**.
 
-For environments with many recipes and failed executions,
-this process can be repetitive, time-consuming, and
-prone to human error.
+### Section 1 — Recipe discovery and connection lookup
 
-The goal of this project is to reduce manual recovery work
-by bringing these operations into a single Workato workflow.
+![Recipe overview](screenshots/01-workflow-overview.png)
 
----
+### Section 2 — Failed-job processing and rerun action
 
-## The Solution
+![Recipe continuation](screenshots/02-workflow-continuation.png)
 
-I developed a Workato recipe that combines recipe discovery,
-connection lookup, job-history inspection, failed-job
-identification, batch reruns, and recovery logging.
+### Section 3 — Error handling and logging
 
-The implementation uses Workato's native automation
-capabilities rather than a separate monitoring application
-or external recovery script.
+![Recipe completion](screenshots/03-workflow-completion.png)
 
-### Workflow Process
+## Recipe definition
 
-**Step 1 — Scheduled Execution**
+[`recipe/recipe_export_SANITIZED_REFERENCE.json`](recipe/recipe_export_SANITIZED_REFERENCE.json) is a **redacted reference copy** of the original Workato recipe definition, not an import-ready deployment artifact. Connection assignments, spreadsheet identifiers, and fixed search dates have been replaced with demonstration values. It needs explicit configuration and safety review before any use.
 
-The recipe starts on a five-minute schedule to regularly
-evaluate the configured recovery workflow.
+## Operational safeguards and limitations
 
-**Step 2 — Recipe Discovery**
+- A matching connection and `failed` status do **not** establish that a job failed because of a connection outage.
+- Recovery should verify connection health and classify the failure before replaying it.
+- Rerunning a job may duplicate side effects from earlier successful steps. Use approval or idempotency controls where necessary.
+- Avoid selecting the same failed jobs on consecutive scheduled runs; durable replay tracking may be required.
+- Set an accurate outage window and enforce per-recipe batch limits before executing reruns.
+- Preserve an audit trail that differentiates a rerun request from successful completion of the rerun job.
 
-The recipe searches for available recipes within the
-Workato workspace and iterates through the returned results.
+The example export is included for **technical review**, not unattended production execution.
 
-**Step 3 — Connection Lookup**
-
-For each recipe, the workflow retrieves connections using
-the configured connector filter.
-
-A conditional check determines whether matching connections
-were found before proceeding.
-
-**Step 4 — Job History Inspection**
-
-The workflow retrieves job history for the selected recipe
-within a specified time range.
-
-The intended recovery window corresponds to the period
-during which the connection disruption occurred.
-
-**Step 5 — Failed-Job Identification**
-
-The recipe iterates through the returned jobs and checks
-whether each job has a `failed` status.
-
-Jobs that do not meet the condition are excluded from
-the rerun branch.
-
-**Step 6 — Batch Job Recovery**
-
-For jobs reaching the recovery branch, the workflow invokes
-Workato's **Rerun specified jobs** action.
-
-This provides a way to initiate recovery without manually
-opening and repeating each failed execution.
-
-**Step 7 — Recovery Logging**
-
-The recipe uses Google Sheets actions to record recovery
-activity, including successful rerun-action execution and
-errors encountered during recovery.
-
-**Step 8 — Error Handling**
-
-A Workato Monitor block surrounds the rerun operation.
-
-If an error occurs, the workflow follows a Do Not Retry
-branch and logs the failure for further investigation.
-
----
-
-## Workato Recipe Demonstration
-
-The screenshots below show three consecutive sections
-of the same Workato recipe.
-
-### Section 1 — Recipe and Connection Discovery
-
-This section demonstrates scheduled execution, recipe
-discovery, connection lookup, conditional checks, and
-job-history retrieval.
-
-![Workato Recipe — Section 1](screenshots/01-workflow-overview.png)
-
-### Section 2 — Failed-Job Detection and Recovery
-
-This section demonstrates failed-job evaluation,
-the batch rerun action, and the monitored recovery
-and logging flow.
-
-![Workato Recipe — Section 2](screenshots/02-workflow-continuation.png)
-
-### Section 3 — Error Handling and Completion
-
-The final section demonstrates recovery-error logging,
-the alternative processing branch, and workflow completion.
-
-![Workato Recipe — Section 3](screenshots/03-workflow-completion.png)
-
----
-
-## Results and Operational Benefits
-
-The completed recipe design brings several previously
-manual recovery activities into one automated Workato workflow.
-
-| Area | Result / Benefit |
-|---|---|
-| Recipe discovery | Centralized lookup of workspace recipes |
-| Connection lookup | Filtered identification of connections |
-| Job inspection | Automated retrieval of recipe execution history |
-| Failure identification | Conditional selection of failed jobs |
-| Job recovery | Batch rerun action integrated into the workflow |
-| Error handling | Monitor and Do Not Retry paths |
-| Audit visibility | Google Sheets logging of recovery activity |
-| Maintainability | Native Workato actions without unnecessary Python steps |
-
-### Key Outcome
-
-The main result is a **consolidated recovery workflow**
-that reduces the number of manual steps an integration
-engineer would otherwise perform when investigating
-and recovering failed jobs.
-
-By automating recipe discovery, job inspection, and rerun
-initiation, the workflow provides a more structured approach
-to integration operations.
-
-The screenshots establish the implemented recipe structure.
-They do not independently establish a measured reduction
-in recovery time or a successful end-to-end batch recovery
-under real outage conditions.
-
----
-
-## Engineering Considerations
-
-Automated job recovery requires careful handling because
-not every failed job is safe to rerun.
-
-A production recovery process should account for:
-
-- **Failure classification:** Confirm that failures are
-  related to the affected connection rather than unrelated
-  application or data errors.
-- **Connection recovery:** Verify that the underlying
-  connection is healthy before rerunning jobs.
-- **Recovery window:** Restrict job searches to the
-  relevant outage period.
-- **Duplicate prevention:** Avoid replaying the same
-  original job repeatedly.
-- **Replay safety:** Consider whether completed steps
-  could create duplicate business operations.
-- **Auditability:** Record what was selected, rerun,
-  and escalated for investigation.
-
-These are important operational considerations.
-Not all safeguards are demonstrated by the screenshots.
-
----
-
-## Technical Capabilities Demonstrated
-
-| Workato Capability | Application |
-|---|---|
-| Scheduled triggers | Periodic recovery workflow |
-| Recipe search | Workspace recipe discovery |
-| Connection search | Connector-based connection lookup |
-| For Each loops | Iteration over recipes and jobs |
-| Conditional logic | Connection and job-status checks |
-| Job history search | Retrieval of execution records |
-| Batch actions | Rerun specified jobs |
-| Monitor blocks | Recovery action error handling |
-| Do Not Retry | Controlled error-path behavior |
-| Google Sheets connector | Recovery activity logging |
-
----
-
-## Project Structure
+## Project files
 
 ```text
 01-connection-failure-recovery/
 ├── README.md
+├── recipe/
+│   └── recipe_export_SANITIZED_REFERENCE.json
 └── screenshots/
     ├── 01-workflow-overview.png
     ├── 02-workflow-continuation.png
     └── 03-workflow-completion.png
 ```
 
----
+## Confidentiality
 
-## Key Takeaway
-
-**Integration engineering is not only about connecting
-systems. It is also about keeping those integrations
-operational, reliable, and maintainable.**
-
-This project demonstrates how Workato can be used to
-automate internal integration operations, investigate
-failed executions, and initiate recovery using existing
-platform capabilities.
-
-It highlights practical experience with Workato recipe
-design, operational automation, batch processing,
-conditional logic, error handling, and audit logging.
-
-## Scope and Limitations
-
-This repository documents the workflow through screenshots
-and technical explanations. It does not provide an
-executable Workato recipe export.
-
-The workflow's visible `failed` status check does not,
-by itself, prove that every selected failure was caused
-by a connection outage.
-
-Before production deployment, automated reruns should be
-restricted to verified, recoverable failures with
-appropriate replay-safety controls.
-
-Any employer-owned workflow details or screenshots should
-be shared publicly only with appropriate authorization.
-
----
-
-**Developed and documented by Mina Akbari.**
+This is a portfolio representation of a Workato workflow. Confirm authorization to share screenshots and workflow logic from any employer-managed environment before publishing. Screenshots must also be checked for internal workspace, account, job, connection, or spreadsheet details. The original export is not included.
