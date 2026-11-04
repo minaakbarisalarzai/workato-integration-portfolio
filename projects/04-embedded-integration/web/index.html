@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; frame-src https://app.workato.com; connect-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <title>Embedded Integration Studio — Reference Demo</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <div class="brand"><span class="brand-mark">IS</span><div>Integration Studio<small>Embedded workspace demo</small></div></div>
+      <p class="eyebrow">WORKSPACE</p>
+      <nav id="navigation" aria-label="Tools"></nav>
+      <div class="side-note">A portfolio reference interface. A secured host API is required for live embedding.</div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><p class="eyebrow">INTEGRATION PLATFORM</p><h1 id="page-title">Projects</h1></div><span class="status" id="status">Not connected</span></header>
+      <section class="content" aria-label="Embedded application">
+        <div class="empty" id="empty"><div class="symbol">↗</div><h2>Embedded workflows, one workspace</h2><p>Choose a tool to request a short-lived authenticated Workato session. A live integration requires an authorized host backend.</p><button id="launch" type="button">Open Projects</button><p class="message" id="message" role="status" aria-live="polite"></p></div>
+        <iframe id="workato-frame" title="Workato embedded application" referrerpolicy="no-referrer" hidden></iframe>
+      </section>
+      <footer>Workato Embedded integration reference · synthetic sample · no credentials in browser source</footer>
+    </main>
+  </div>
+</body>
+</html>

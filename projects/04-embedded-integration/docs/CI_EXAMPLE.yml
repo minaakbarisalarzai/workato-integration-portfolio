@@ -1,0 +1,32 @@
+name: Reference implementation checks
+on:
+  push:
+    paths:
+      - 'projects/04-embedded-integration/**'
+      - '.github/workflows/tests.yml'
+  pull_request:
+    paths:
+      - 'projects/04-embedded-integration/**'
+      - '.github/workflows/tests.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/04-embedded-integration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: JavaScript tests
+        run: node --test services/embed-session/test/*.test.mjs web/*.test.mjs
+      - name: Python tests
+        run: PYTHONPATH=services/provisioning python -m unittest discover -s services/provisioning/tests -v
+      - name: Python syntax
+        run: python -m compileall -q services/provisioning
+      - name: Safe-content precheck
+        run: python scripts/check_publication.py
