@@ -1,128 +1,101 @@
+
 # Workato Integration Engineering Portfolio
 
-**Automation · Custom Connectors · API Integrations · Workflow Design**
+**Mina Akbari | Software Engineer — Integrations & Automation**
 
-A collection of independently developed integration engineering projects demonstrating practical experience with **Workato, Ruby, Python, REST APIs, and automation architecture**.
+Workato · Ruby · Python · REST APIs · Custom Connectors · Workflow Automation
 
-This portfolio focuses on building maintainable integrations, designing reliable workflows, handling API failures, and validating implementations through testing.
+A collection of integration engineering projects showcasing my experience building Workato automations, developing custom connectors, optimizing API integrations, and designing reliable integration workflows.
 
-**Author:** Mina Akbari  
-**Specialization:** Workato Integrations | Custom Connector Development | API Automation
+## Featured Projects
+
+### 01 — Workato Connection Failure Detection & Automated Job Recovery
+
+**[View Project](projects/01-connection-failure-recovery/)**
+
+Designed and used a Workato automation to streamline the investigation and recovery of failed integration jobs.
+
+**Technical Highlights**
+- Scheduled recipe discovery and connection lookup.
+- Automated job-history searches and failed-job identification.
+- Job rerun orchestration using Workato's RecipeOps actions.
+- Error handling with Monitor and Do Not Retry.
+- Recovery activity logging through Google Sheets.
+
+**Outcome:** Consolidated previously manual recovery activities into a structured Workato workflow.
+
+### 02 — Workato Recipe Optimization
+
+**[View Project](projects/02-recipe-optimization/)**
+
+Two before-and-after case studies demonstrating how to reduce Workato task consumption and simplify integration workflows.
+
+**Case Study 1 — API Consolidation**
+- Reduced configured workflow actions from **23 to 2 (91.3%)**.
+- Reduced observed Workato task consumption from **5 to 2 (60%)**.
+- Consolidated five REST API requests and supporting logic into Python.
+- Both compared executions completed successfully.
+
+**Case Study 2 — Native Formula Optimization**
+- Replaced a Python JSON-to-Base64 encoder with `to_json.encode_base64`.
+- Reduced configured Python actions from **2 to 1 (50%)**.
+- Verified matching Base64 values in Workato executions.
+
+**Outcome:** Demonstrated task efficiency, simpler recipe design, and reduced task-based resource consumption.
+
+### 03 — GitHub Issue Explorer | Custom Workato Connector
+
+**[View Project](projects/03-custom-connector/)**
+
+Built a custom Workato connector in Ruby using the Workato Connector SDK and GitHub REST API.
+
+**Technical Highlights**
+- Fine-grained token authentication.
+- Dynamic repository and label picklists.
+- Issue retrieval, filtering, and sorting.
+- Link-header pagination.
+- Input validation, descriptive errors, and retry handling.
+- Automated Ruby tests and live Workato demonstrations.
+
+**Testing:** 19 unit tests and 59 assertions passing, with core functionality tested in Workato. Additional changes in the revised connector require live verification.
+
+### 04 — Embedded Integration Architecture
+
+**[View Project](projects/04-embedded-integration/)**
+
+Architecture and reference implementation for embedding integration capabilities into an application.
+
+**Technical Focus**
+- Workato workspace provisioning.
+- API-driven integration setup.
+- Secure JWT-based embedding.
+- Workspace access and permission management.
+- Integration templates and automation architecture.
+
+**Status:** Reference project; implementation and documentation scope may evolve.
 
 ---
 
-## Featured Project — GitHub Issue Explorer
+## Technical Skills
 
-**Status:** Implemented | Core functionality tested in Workato
-
-**[View GitHub Issue Explorer — Source Code, Tests, Documentation & Screenshots](projects/03-custom-connector/)**
-
-A custom Workato connector developed using **Ruby and the Workato Connector SDK**, integrating with the GitHub REST API to retrieve, filter, and process repository issues.
-
-The project demonstrates a production-oriented approach to connector development, with emphasis on security, reusable code, configurable actions, structured responses, and descriptive error handling.
-
-### Technical Highlights
-
-- **Authentication:** Fine-grained GitHub personal access token authentication with connection validation.
-- **Custom Connector SDK:** Ruby-based connector implementation with reusable helper methods and object definitions.
-- **Dynamic Picklists:** Context-dependent repository and label selection.
-- **API Integration:** GitHub REST API requests with configurable issue filters and sorting.
-- **Pagination:** Link-header parsing with `next_page` and `has_more` metadata.
-- **Input Validation:** Explicit validation of repository identifiers and pagination parameters.
-- **Error Handling:** Descriptive messages for authentication, authorization, validation, rate limiting, and server failures.
-- **Retry Configuration:** Bounded retries for supported transient HTTP errors.
-- **Automated Testing:** Offline Ruby tests using synthetic API responses.
-
-### Development and Testing
-
-| Area | Evidence |
+| Area | Technologies & Capabilities |
 |---|---|
-| Ruby syntax validation | Passed |
-| Automated unit tests | 19 tests, 59 assertions passing |
-| GitHub API authentication | Successfully tested in Workato |
-| Repository issue retrieval | Successfully returned 3 demonstration issues |
-| Pagination | First-page and final-page scenarios tested |
-| Label filtering | Successfully filtered issues using the `bug` label |
-| Input validation | Rejected invalid `per_page = 101` |
-| API error handling | HTTP 422 error scenario exercised |
+| Integration Platforms | Workato, Workato Connector SDK, RecipeOps |
+| Programming | Ruby, Python |
+| API Development | REST APIs, HTTP, JSON, Authentication, Pagination |
+| Automation | Recipe Design, Workflow Optimization, Error Handling |
+| Testing | Ruby Minitest, Python Unit Tests, API Testing |
+| Tools | Git, GitHub |
 
-*Note: Some live Workato tests were performed on an earlier connector revision. The revised V2 implementation includes additional improvements that require further live verification.*
+## Engineering Approach
 
-### Workato Demonstration
+I focus on building integrations that are:
 
-**Successful GitHub API integration**
-
-The connector retrieves repository issues and returns structured data for downstream recipe actions.
-
-![GitHub Issue Explorer Successful API Response](projects/03-custom-connector/screenshots/04-successful-api-response.png)
-
-**Custom input validation**
-
-The connector rejects unsupported values and provides descriptive error messages to assist with troubleshooting.
-
-![GitHub Issue Explorer Input Validation](projects/03-custom-connector/screenshots/05-input-validation-error.png)
-
-**[Explore the complete connector project and all seven Workato screenshots](projects/03-custom-connector/)**
-
----
-
-## Projects
-
-| Project | Technical Focus | Status |
-|---|---|---|
-| [01 · Connection Failure Detection & Automated Job Recovery](projects/01-connection-failure-recovery/) | Workato recipe monitoring, connection-related failure investigation, batch job replay, and recovery logging | Implemented — Verification Ongoing |
-| [02 · Recipe Optimization](projects/02-recipe-optimization/) | Reducing unnecessary scripting with native Workato formulas | Planned |
-| [03 · GitHub Issue Explorer — Custom Connector](projects/03-custom-connector/) | Ruby SDK, GitHub REST API, authentication, pagination, validation, and testing | **Implemented — Core Tested** |
-| [04 · Embedded Integration Architecture](projects/04-embedded-integration/) | Reference architecture for workspace provisioning, secure embedding, and permissions | Planned |
-
-Additional projects will be developed and documented incrementally.
-
-See the [Project Roadmap](docs/ROADMAP.md) for planned work.
-
----
-
-## Engineering Principles
-
-My approach to integration engineering emphasizes practical solutions, maintainability, and predictable behavior.
-
-**Correctness First**
-
-Identify assumptions, validate inputs, document edge cases, and test expected behavior.
-
-**Platform-Native Solutions**
-
-Use Workato's built-in formulas, actions, and workflow capabilities where appropriate. Introduce custom code when it provides meaningful additional functionality.
-
-**Reusable and Maintainable Code**
-
-Keep logic modular, reduce duplication, and design integrations that are understandable to other developers.
-
-**Resilience and Error Handling**
-
-Consider API failures, authentication problems, permission issues, rate limits, pagination, and retry behavior.
-
-**Security and Least Privilege**
-
-Use restricted API permissions, avoid embedded credentials, and protect sensitive information.
-
-**Testing and Documentation**
-
-Include reproducible examples, technical explanations, validation scenarios, and clear implementation limitations.
-
----
-
-## Technology Stack
-
-| Category | Technologies |
-|---|---|
-| Integration and Automation | Workato, Workato Connector SDK |
-| Programming Languages | Ruby, Python |
-| APIs and Authentication | REST APIs, JSON, HTTP, Bearer Tokens |
-| Development Practices | Input Validation, Error Handling, Pagination, Retry Logic |
-| Testing | Ruby Minitest, Synthetic API Fixtures |
-| Version Control | Git, GitHub |
-
----
+- **Reliable:** Clear error handling, validation, and recovery paths.
+- **Efficient:** Reduced task consumption and unnecessary actions.
+- **Maintainable:** Reusable logic and appropriate use of native Workato features.
+- **Secure:** Least-privilege access and careful handling of credentials.
+- **Testable:** Documented behavior, reproducible examples, and meaningful validation.
 
 ## Repository Structure
 
@@ -131,71 +104,23 @@ workato-integration-portfolio/
 ├── README.md
 ├── SECURITY.md
 ├── docs/
-│   └── ROADMAP.md
 └── projects/
-    ├── 01-loop-control/
+    ├── 01-connection-failure-recovery/
     ├── 02-recipe-optimization/
     ├── 03-custom-connector/
-    │   ├── connector.rb
-    │   ├── README.md
-    │   ├── LICENSE
-    │   ├── docs/
-    │   │   ├── DESIGN.md
-    │   │   └── TEST_PLAN.md
-    │   ├── fixtures/
-    │   │   └── issues_page.json
-    │   ├── spec/
-    │   │   └── connector_test.rb
-    │   └── screenshots/
-    │       ├── 01-connector-sdk.png
-    │       ├── 02-recipe-configuration.png
-    │       ├── 03-action-fields.png
-    │       ├── 04-successful-api-response.png
-    │       ├── 05-input-validation-error.png
-    │       ├── 06-validation-test-input.png
-    │       └── 07-successful-test-input.png
     └── 04-embedded-integration/
 ```
 
----
-
-## How to Explore This Portfolio
-
-Start with the **[GitHub Issue Explorer Custom Connector](projects/03-custom-connector/)**.
-
-The project includes:
-
-1. Ruby source code demonstrating the Workato Connector SDK.
-2. Technical architecture and implementation decisions.
-3. Automated tests and synthetic API fixtures.
-4. Live Workato screenshots.
-5. Input validation and error-handling examples.
-6. Setup instructions, testing procedures, and known limitations.
-
-The goal is to make each project understandable and reproducible without access to private systems or production environments.
-
----
-
-## Confidentiality and Attribution
-
-All examples are independently authored demonstrations developed for educational and portfolio purposes.
-
-This repository does **not** contain employer or customer source code, proprietary integrations, production recipes, confidential configurations, authentication credentials, or customer information.
-
-Demonstration projects use public APIs and synthetic data.
-
-These projects are not affiliated with or endorsed by Workato, GitHub, or my employer.
-
----
-
 ## About Me
 
-I am a software engineer specializing in **integration engineering, workflow automation, API integrations, and Workato custom connector development**.
+I'm a software engineer specializing in **Workato integrations, custom connector development, API automation, and workflow optimization**.
 
-My technical interests include designing reliable integrations, simplifying automation workflows, building reusable connectors, and improving the maintainability of integration systems.
+My experience includes developing Ruby-based Workato connectors, building integrations with external APIs, automating operational workflows, and improving integration efficiency through Python and platform-native capabilities.
 
-Through this portfolio, I aim to demonstrate my engineering approach with practical, testable examples rather than relying solely on descriptions of previous work.
+This portfolio highlights practical engineering work through implementations, testing, technical documentation, and Workato demonstrations.
 
 ---
 
 **Developed and maintained by Mina Akbari.**
+
+*Portfolio examples are intended for demonstration purposes.
