@@ -1,0 +1,2280 @@
+{
+  "name": "API Integration — Multi-Step HTTP Workflow (Baseline)",
+  "description": "",
+  "version": 5,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "clock",
+    "name": "scheduled_event",
+    "as": "4633331c",
+    "keyword": "trigger",
+    "input": {
+      "time_unit": "minutes",
+      "trigger_every": "5"
+    },
+    "extended_input_schema": [
+      {
+        "control_type": "integer",
+        "default": "5",
+        "enforce_template_mode": true,
+        "extends_schema": true,
+        "hint": "Define repeating schedule. Enter whole numbers only.This field can be set to a minimum of 5 minutes.",
+        "label": "Trigger every",
+        "name": "trigger_every",
+        "optional": false,
+        "suffix": {
+          "text": "minutes"
+        },
+        "type": "string"
+      },
+      {
+        "control_type": "select",
+        "hint": "Select the timezone to use. Leave it blank to use <b>{{authUser.account_timezone}}</b>",
+        "label": "Timezone",
+        "name": "timezone",
+        "optional": true,
+        "pick_list": "timezone_id_global_pick_list",
+        "pick_list_connection_less": true,
+        "type": "string"
+      },
+      {
+        "control_type": "date_time",
+        "enforce_template_mode": true,
+        "extends_schema": true,
+        "hint": "Set date and time to start or leave blank to start immediately. <b>Once recipe has been run or tested, value cannot be changed.</b>",
+        "label": "Start after",
+        "name": "start_after",
+        "optional": true,
+        "parse_output": "date_time_conversion",
+        "since_field": true,
+        "type": "date_time",
+        "ignore_timezone": true,
+        "render_input": "date_time_conversion"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "provider": "rest_secondary",
+            "name": "make_request_v2",
+            "as": "1753e578",
+            "keyword": "action",
+            "toggleCfg": {
+              "response.ignore_http_errors": true,
+              "disable_retries": true
+            },
+            "input": {
+              "request_name": "Send request",
+              "request": {
+                "method": "GET",
+                "content_type": "application/json",
+                "url": "#{_dp('{\"pill_type\":\"project_property\",\"property_name\":\"Get User\"}')}"
+              },
+              "response": {
+                "output_type": "json",
+                "expected_encoding": "UTF-8",
+                "ignore_http_errors": "false",
+                "response_schema": "[{\"control_type\":\"number\",\"label\":\"ID\",\"parse_output\":\"float_conversion\",\"type\":\"number\",\"name\":\"id\"},{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Username\",\"type\":\"string\",\"name\":\"username\"},{\"control_type\":\"text\",\"label\":\"Email\",\"type\":\"string\",\"name\":\"email\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Street\",\"type\":\"string\",\"name\":\"street\"},{\"control_type\":\"text\",\"label\":\"Suite\",\"type\":\"string\",\"name\":\"suite\"},{\"control_type\":\"text\",\"label\":\"City\",\"type\":\"string\",\"name\":\"city\"},{\"control_type\":\"text\",\"label\":\"Zipcode\",\"type\":\"string\",\"name\":\"zipcode\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Lat\",\"type\":\"string\",\"name\":\"lat\"},{\"control_type\":\"text\",\"label\":\"Lng\",\"type\":\"string\",\"name\":\"lng\"}],\"label\":\"Geo\",\"type\":\"object\",\"name\":\"geo\"}],\"label\":\"Address\",\"type\":\"object\",\"name\":\"address\"},{\"control_type\":\"text\",\"label\":\"Phone\",\"type\":\"string\",\"name\":\"phone\"},{\"control_type\":\"text\",\"label\":\"Website\",\"type\":\"string\",\"name\":\"website\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Catch phrase\",\"type\":\"string\",\"name\":\"catchPhrase\"},{\"control_type\":\"text\",\"label\":\"Bs\",\"type\":\"string\",\"name\":\"bs\"}],\"label\":\"Company\",\"type\":\"object\",\"name\":\"company\"}]",
+                "headers_schema": "[{\"control_type\":\"date_time\",\"label\":\"Date\",\"render_input\":\"date_time_conversion\",\"parse_output\":\"date_time_conversion\",\"type\":\"date_time\",\"name\":\"date\"},{\"control_type\":\"text\",\"label\":\"Content type\",\"type\":\"string\",\"name\":\"content_type\"},{\"control_type\":\"text\",\"label\":\"Transfer encoding\",\"type\":\"string\",\"name\":\"transfer_encoding\"},{\"control_type\":\"text\",\"label\":\"Connection\",\"type\":\"string\",\"name\":\"connection\"},{\"control_type\":\"text\",\"label\":\"Access control allow credentials\",\"type\":\"string\",\"name\":\"access_control_allow_credentials\"},{\"control_type\":\"text\",\"label\":\"Cache control\",\"type\":\"string\",\"name\":\"cache_control\"},{\"control_type\":\"text\",\"label\":\"Etag\",\"type\":\"string\",\"name\":\"etag\"},{\"control_type\":\"text\",\"label\":\"Expires\",\"type\":\"string\",\"name\":\"expires\"},{\"control_type\":\"text\",\"label\":\"Pragma\",\"type\":\"string\",\"name\":\"pragma\"},{\"control_type\":\"text\",\"label\":\"Vary\",\"type\":\"string\",\"name\":\"vary\"},{\"control_type\":\"text\",\"label\":\"X content type options\",\"type\":\"string\",\"name\":\"x_content_type_options\"},{\"control_type\":\"text\",\"label\":\"X powered by\",\"type\":\"string\",\"name\":\"x_powered_by\"},{\"control_type\":\"text\",\"label\":\"X ratelimit limit\",\"type\":\"string\",\"name\":\"x_ratelimit_limit\"},{\"control_type\":\"text\",\"label\":\"X ratelimit remaining\",\"type\":\"string\",\"name\":\"x_ratelimit_remaining\"},{\"control_type\":\"text\",\"label\":\"X ratelimit reset\",\"type\":\"string\",\"name\":\"x_ratelimit_reset\"},{\"control_type\":\"text\",\"label\":\"Age\",\"type\":\"string\",\"name\":\"age\"},{\"control_type\":\"text\",\"label\":\"Report to\",\"type\":\"string\",\"name\":\"report_to\"},{\"control_type\":\"text\",\"label\":\"Cf cache status\",\"type\":\"string\",\"name\":\"cf_cache_status\"},{\"control_type\":\"text\",\"label\":\"Nel\",\"type\":\"string\",\"name\":\"nel\"},{\"control_type\":\"text\",\"label\":\"Server\",\"type\":\"string\",\"name\":\"server\"},{\"control_type\":\"text\",\"label\":\"Cf ray\",\"type\":\"string\",\"name\":\"cf_ray\"},{\"control_type\":\"text\",\"label\":\"Alt svc\",\"type\":\"string\",\"name\":\"alt_svc\"}]"
+              },
+              "wait_for_response": "false",
+              "completion_threshold_seconds": "3600",
+              "disable_retries": "false",
+              "enable_streaming": "false"
+            },
+            "extended_output_schema": [
+              {
+                "label": "Headers",
+                "name": "headers",
+                "properties": [
+                  {
+                    "control_type": "date_time",
+                    "label": "Date",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "type": "date_time",
+                    "name": "date"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Content type",
+                    "type": "string",
+                    "name": "content_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Transfer encoding",
+                    "type": "string",
+                    "name": "transfer_encoding"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Connection",
+                    "type": "string",
+                    "name": "connection"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Access control allow credentials",
+                    "type": "string",
+                    "name": "access_control_allow_credentials"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cache control",
+                    "type": "string",
+                    "name": "cache_control"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Etag",
+                    "type": "string",
+                    "name": "etag"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Expires",
+                    "type": "string",
+                    "name": "expires"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Pragma",
+                    "type": "string",
+                    "name": "pragma"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Vary",
+                    "type": "string",
+                    "name": "vary"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X content type options",
+                    "type": "string",
+                    "name": "x_content_type_options"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X powered by",
+                    "type": "string",
+                    "name": "x_powered_by"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit limit",
+                    "type": "string",
+                    "name": "x_ratelimit_limit"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit remaining",
+                    "type": "string",
+                    "name": "x_ratelimit_remaining"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit reset",
+                    "type": "string",
+                    "name": "x_ratelimit_reset"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Age",
+                    "type": "string",
+                    "name": "age"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Report to",
+                    "type": "string",
+                    "name": "report_to"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf cache status",
+                    "type": "string",
+                    "name": "cf_cache_status"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Nel",
+                    "type": "string",
+                    "name": "nel"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Server",
+                    "type": "string",
+                    "name": "server"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf ray",
+                    "type": "string",
+                    "name": "cf_ray"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Alt svc",
+                    "type": "string",
+                    "name": "alt_svc"
+                  }
+                ],
+                "type": "object"
+              },
+              {
+                "label": "Response",
+                "name": "response",
+                "properties": [
+                  {
+                    "control_type": "number",
+                    "label": "ID",
+                    "parse_output": "float_conversion",
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "type": "string",
+                    "name": "name"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "type": "string",
+                    "name": "email"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Street",
+                        "type": "string",
+                        "name": "street"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Suite",
+                        "type": "string",
+                        "name": "suite"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "City",
+                        "type": "string",
+                        "name": "city"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Zipcode",
+                        "type": "string",
+                        "name": "zipcode"
+                      },
+                      {
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Lat",
+                            "type": "string",
+                            "name": "lat"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Lng",
+                            "type": "string",
+                            "name": "lng"
+                          }
+                        ],
+                        "label": "Geo",
+                        "type": "object",
+                        "name": "geo"
+                      }
+                    ],
+                    "label": "Address",
+                    "type": "object",
+                    "name": "address"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Phone",
+                    "type": "string",
+                    "name": "phone"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Website",
+                    "type": "string",
+                    "name": "website"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "type": "string",
+                        "name": "name"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Catch phrase",
+                        "type": "string",
+                        "name": "catchPhrase"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Bs",
+                        "type": "string",
+                        "name": "bs"
+                      }
+                    ],
+                    "label": "Company",
+                    "type": "object",
+                    "name": "company"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Response",
+                "name": "response",
+                "override": true,
+                "properties": [
+                  {
+                    "control_type": "select",
+                    "label": "Response content type",
+                    "pick_list": [
+                      [
+                        "Text",
+                        "rawdatatxt"
+                      ],
+                      [
+                        "Binary",
+                        "rawdata"
+                      ],
+                      [
+                        "JSON",
+                        "json"
+                      ],
+                      [
+                        "XML",
+                        "xml2"
+                      ],
+                      [
+                        "Multipart",
+                        "multipart"
+                      ]
+                    ],
+                    "hint": "Select expected format of data response type, e.g. JSON or XML. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "default": "json",
+                    "extends_schema": true,
+                    "type": "string",
+                    "name": "output_type"
+                  },
+                  {
+                    "control_type": "select",
+                    "label": "Encoding",
+                    "pick_list": "supported_encodings_without_binary_global_pick_list",
+                    "pick_list_connection_less": true,
+                    "optional": true,
+                    "default": "UTF-8",
+                    "hint": "Default encoding type is set to UTF-8, and typically doesn't need to be changed. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "type": "string",
+                    "name": "expected_encoding"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Response schema",
+                    "sample_data_type": "json_http",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all fields in your response.",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "response_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "HTTP response headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all the response headers",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "headers_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Multipart part headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe headers within each multipart part",
+                    "optional": true,
+                    "sticky": true,
+                    "hint": "Define the headers that appear in each part of the multipart response (e.g., Content-Type, Content-ID)",
+                    "ngIf": "input.response.output_type == 'multipart'",
+                    "type": "string",
+                    "name": "part_headers_schema"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Mark non-2xx response codes as success?",
+                    "default": "false",
+                    "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Mark non-2xx response codes as success?",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "default": false,
+                      "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                      "optional": true,
+                      "render_input": null,
+                      "parse_output": null,
+                      "type": "boolean",
+                      "name": "ignore_http_errors"
+                    },
+                    "type": "boolean",
+                    "name": "ignore_http_errors"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "c7594e5a-b517-49ba-9d23-598168711680",
+            "wizardFinished": true
+          },
+          {
+            "number": 3,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "equals_to",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"rest_secondary\",\"line\":\"1753e578\",\"path\":[\"response\",\"name\"]}')}",
+                  "rhs": "Leanne Graham",
+                  "uuid": "34092999-d7c7-47b8-8e39-3112d42ba7b2"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 4,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "460b2469",
+                "keyword": "action",
+                "input": {
+                  "message": "Failed"
+                },
+                "uuid": "a21f81be-0fe4-480f-a3b4-ccec20f3f088"
+              }
+            ],
+            "uuid": "ccbe0e76-9526-4d9f-a53c-e4455982b159"
+          },
+          {
+            "number": 5,
+            "as": "064aff08",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "3",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 6,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "42b49e5f",
+                "keyword": "action",
+                "input": {
+                  "message": "Failed"
+                },
+                "uuid": "fa56fead-c8ee-4177-bbce-eba93e94c77d"
+              }
+            ],
+            "uuid": "acc24d82-9bfa-47e6-a86a-df180527aa31"
+          }
+        ],
+        "uuid": "420b7e1e-56af-46d2-be87-1c42dae48cf1"
+      },
+      {
+        "number": 7,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 8,
+            "provider": "rest_secondary",
+            "name": "make_request_v2",
+            "as": "8a12313e",
+            "keyword": "action",
+            "toggleCfg": {
+              "response.ignore_http_errors": true,
+              "disable_retries": true
+            },
+            "input": {
+              "request_name": "Send request",
+              "request": {
+                "method": "GET",
+                "content_type": "application/json",
+                "url": "#{_dp('{\"pill_type\":\"project_property\",\"property_name\":\"Get Posts\"}')}"
+              },
+              "response": {
+                "output_type": "json",
+                "expected_encoding": "UTF-8",
+                "ignore_http_errors": "false",
+                "response_schema": "[{\"control_type\":\"number\",\"label\":\"ID\",\"parse_output\":\"float_conversion\",\"type\":\"number\",\"name\":\"id\"},{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Username\",\"type\":\"string\",\"name\":\"username\"},{\"control_type\":\"text\",\"label\":\"Email\",\"type\":\"string\",\"name\":\"email\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Street\",\"type\":\"string\",\"name\":\"street\"},{\"control_type\":\"text\",\"label\":\"Suite\",\"type\":\"string\",\"name\":\"suite\"},{\"control_type\":\"text\",\"label\":\"City\",\"type\":\"string\",\"name\":\"city\"},{\"control_type\":\"text\",\"label\":\"Zipcode\",\"type\":\"string\",\"name\":\"zipcode\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Lat\",\"type\":\"string\",\"name\":\"lat\"},{\"control_type\":\"text\",\"label\":\"Lng\",\"type\":\"string\",\"name\":\"lng\"}],\"label\":\"Geo\",\"type\":\"object\",\"name\":\"geo\"}],\"label\":\"Address\",\"type\":\"object\",\"name\":\"address\"},{\"control_type\":\"text\",\"label\":\"Phone\",\"type\":\"string\",\"name\":\"phone\"},{\"control_type\":\"text\",\"label\":\"Website\",\"type\":\"string\",\"name\":\"website\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Catch phrase\",\"type\":\"string\",\"name\":\"catchPhrase\"},{\"control_type\":\"text\",\"label\":\"Bs\",\"type\":\"string\",\"name\":\"bs\"}],\"label\":\"Company\",\"type\":\"object\",\"name\":\"company\"}]",
+                "headers_schema": "[{\"control_type\":\"date_time\",\"label\":\"Date\",\"render_input\":\"date_time_conversion\",\"parse_output\":\"date_time_conversion\",\"type\":\"date_time\",\"name\":\"date\"},{\"control_type\":\"text\",\"label\":\"Content type\",\"type\":\"string\",\"name\":\"content_type\"},{\"control_type\":\"text\",\"label\":\"Transfer encoding\",\"type\":\"string\",\"name\":\"transfer_encoding\"},{\"control_type\":\"text\",\"label\":\"Connection\",\"type\":\"string\",\"name\":\"connection\"},{\"control_type\":\"text\",\"label\":\"Access control allow credentials\",\"type\":\"string\",\"name\":\"access_control_allow_credentials\"},{\"control_type\":\"text\",\"label\":\"Cache control\",\"type\":\"string\",\"name\":\"cache_control\"},{\"control_type\":\"text\",\"label\":\"Etag\",\"type\":\"string\",\"name\":\"etag\"},{\"control_type\":\"text\",\"label\":\"Expires\",\"type\":\"string\",\"name\":\"expires\"},{\"control_type\":\"text\",\"label\":\"Pragma\",\"type\":\"string\",\"name\":\"pragma\"},{\"control_type\":\"text\",\"label\":\"Vary\",\"type\":\"string\",\"name\":\"vary\"},{\"control_type\":\"text\",\"label\":\"X content type options\",\"type\":\"string\",\"name\":\"x_content_type_options\"},{\"control_type\":\"text\",\"label\":\"X powered by\",\"type\":\"string\",\"name\":\"x_powered_by\"},{\"control_type\":\"text\",\"label\":\"X ratelimit limit\",\"type\":\"string\",\"name\":\"x_ratelimit_limit\"},{\"control_type\":\"text\",\"label\":\"X ratelimit remaining\",\"type\":\"string\",\"name\":\"x_ratelimit_remaining\"},{\"control_type\":\"text\",\"label\":\"X ratelimit reset\",\"type\":\"string\",\"name\":\"x_ratelimit_reset\"},{\"control_type\":\"text\",\"label\":\"Age\",\"type\":\"string\",\"name\":\"age\"},{\"control_type\":\"text\",\"label\":\"Report to\",\"type\":\"string\",\"name\":\"report_to\"},{\"control_type\":\"text\",\"label\":\"Cf cache status\",\"type\":\"string\",\"name\":\"cf_cache_status\"},{\"control_type\":\"text\",\"label\":\"Nel\",\"type\":\"string\",\"name\":\"nel\"},{\"control_type\":\"text\",\"label\":\"Server\",\"type\":\"string\",\"name\":\"server\"},{\"control_type\":\"text\",\"label\":\"Cf ray\",\"type\":\"string\",\"name\":\"cf_ray\"},{\"control_type\":\"text\",\"label\":\"Alt svc\",\"type\":\"string\",\"name\":\"alt_svc\"}]"
+              },
+              "wait_for_response": "false",
+              "completion_threshold_seconds": "3600",
+              "disable_retries": "false",
+              "enable_streaming": "false"
+            },
+            "extended_output_schema": [
+              {
+                "label": "Headers",
+                "name": "headers",
+                "properties": [
+                  {
+                    "control_type": "date_time",
+                    "label": "Date",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "type": "date_time",
+                    "name": "date"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Content type",
+                    "type": "string",
+                    "name": "content_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Transfer encoding",
+                    "type": "string",
+                    "name": "transfer_encoding"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Connection",
+                    "type": "string",
+                    "name": "connection"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Access control allow credentials",
+                    "type": "string",
+                    "name": "access_control_allow_credentials"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cache control",
+                    "type": "string",
+                    "name": "cache_control"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Etag",
+                    "type": "string",
+                    "name": "etag"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Expires",
+                    "type": "string",
+                    "name": "expires"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Pragma",
+                    "type": "string",
+                    "name": "pragma"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Vary",
+                    "type": "string",
+                    "name": "vary"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X content type options",
+                    "type": "string",
+                    "name": "x_content_type_options"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X powered by",
+                    "type": "string",
+                    "name": "x_powered_by"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit limit",
+                    "type": "string",
+                    "name": "x_ratelimit_limit"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit remaining",
+                    "type": "string",
+                    "name": "x_ratelimit_remaining"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit reset",
+                    "type": "string",
+                    "name": "x_ratelimit_reset"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Age",
+                    "type": "string",
+                    "name": "age"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Report to",
+                    "type": "string",
+                    "name": "report_to"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf cache status",
+                    "type": "string",
+                    "name": "cf_cache_status"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Nel",
+                    "type": "string",
+                    "name": "nel"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Server",
+                    "type": "string",
+                    "name": "server"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf ray",
+                    "type": "string",
+                    "name": "cf_ray"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Alt svc",
+                    "type": "string",
+                    "name": "alt_svc"
+                  }
+                ],
+                "type": "object"
+              },
+              {
+                "label": "Response",
+                "name": "response",
+                "properties": [
+                  {
+                    "control_type": "number",
+                    "label": "ID",
+                    "parse_output": "float_conversion",
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "type": "string",
+                    "name": "name"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "type": "string",
+                    "name": "email"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Street",
+                        "type": "string",
+                        "name": "street"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Suite",
+                        "type": "string",
+                        "name": "suite"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "City",
+                        "type": "string",
+                        "name": "city"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Zipcode",
+                        "type": "string",
+                        "name": "zipcode"
+                      },
+                      {
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Lat",
+                            "type": "string",
+                            "name": "lat"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Lng",
+                            "type": "string",
+                            "name": "lng"
+                          }
+                        ],
+                        "label": "Geo",
+                        "type": "object",
+                        "name": "geo"
+                      }
+                    ],
+                    "label": "Address",
+                    "type": "object",
+                    "name": "address"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Phone",
+                    "type": "string",
+                    "name": "phone"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Website",
+                    "type": "string",
+                    "name": "website"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "type": "string",
+                        "name": "name"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Catch phrase",
+                        "type": "string",
+                        "name": "catchPhrase"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Bs",
+                        "type": "string",
+                        "name": "bs"
+                      }
+                    ],
+                    "label": "Company",
+                    "type": "object",
+                    "name": "company"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Response",
+                "name": "response",
+                "override": true,
+                "properties": [
+                  {
+                    "control_type": "select",
+                    "label": "Response content type",
+                    "pick_list": [
+                      [
+                        "Text",
+                        "rawdatatxt"
+                      ],
+                      [
+                        "Binary",
+                        "rawdata"
+                      ],
+                      [
+                        "JSON",
+                        "json"
+                      ],
+                      [
+                        "XML",
+                        "xml2"
+                      ],
+                      [
+                        "Multipart",
+                        "multipart"
+                      ]
+                    ],
+                    "hint": "Select expected format of data response type, e.g. JSON or XML. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "default": "json",
+                    "extends_schema": true,
+                    "type": "string",
+                    "name": "output_type"
+                  },
+                  {
+                    "control_type": "select",
+                    "label": "Encoding",
+                    "pick_list": "supported_encodings_without_binary_global_pick_list",
+                    "pick_list_connection_less": true,
+                    "optional": true,
+                    "default": "UTF-8",
+                    "hint": "Default encoding type is set to UTF-8, and typically doesn't need to be changed. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "type": "string",
+                    "name": "expected_encoding"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Response schema",
+                    "sample_data_type": "json_http",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all fields in your response.",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "response_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "HTTP response headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all the response headers",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "headers_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Multipart part headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe headers within each multipart part",
+                    "optional": true,
+                    "sticky": true,
+                    "hint": "Define the headers that appear in each part of the multipart response (e.g., Content-Type, Content-ID)",
+                    "ngIf": "input.response.output_type == 'multipart'",
+                    "type": "string",
+                    "name": "part_headers_schema"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Mark non-2xx response codes as success?",
+                    "default": "false",
+                    "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Mark non-2xx response codes as success?",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "default": false,
+                      "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                      "optional": true,
+                      "render_input": null,
+                      "parse_output": null,
+                      "type": "boolean",
+                      "name": "ignore_http_errors"
+                    },
+                    "type": "boolean",
+                    "name": "ignore_http_errors"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "d0e58542-4ef8-4618-aa26-9f5cfa2aa117",
+            "wizardFinished": true
+          },
+          {
+            "number": 9,
+            "as": "19d5dce9",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 10,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "931390e9",
+                "keyword": "action",
+                "input": {
+                  "message": "Failed"
+                },
+                "uuid": "042889f6-d2bb-4566-a775-2f9152af7349"
+              }
+            ],
+            "uuid": "b3f19177-3721-4b9d-ab4b-7dc1b3472057"
+          }
+        ],
+        "uuid": "b21f27bc-f63a-4ef6-9f55-8ef35a1c022c"
+      },
+      {
+        "number": 11,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 12,
+            "provider": "rest_secondary",
+            "name": "make_request_v2",
+            "as": "2174f4c0",
+            "keyword": "action",
+            "toggleCfg": {
+              "response.ignore_http_errors": true,
+              "disable_retries": true
+            },
+            "input": {
+              "request_name": "Send request",
+              "request": {
+                "method": "GET",
+                "content_type": "application/json",
+                "url": "#{_dp('{\"pill_type\":\"project_property\",\"property_name\":\"Get Comments\"}')}"
+              },
+              "response": {
+                "output_type": "json",
+                "expected_encoding": "UTF-8",
+                "ignore_http_errors": "false",
+                "response_schema": "[{\"control_type\":\"number\",\"label\":\"ID\",\"parse_output\":\"float_conversion\",\"type\":\"number\",\"name\":\"id\"},{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Username\",\"type\":\"string\",\"name\":\"username\"},{\"control_type\":\"text\",\"label\":\"Email\",\"type\":\"string\",\"name\":\"email\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Street\",\"type\":\"string\",\"name\":\"street\"},{\"control_type\":\"text\",\"label\":\"Suite\",\"type\":\"string\",\"name\":\"suite\"},{\"control_type\":\"text\",\"label\":\"City\",\"type\":\"string\",\"name\":\"city\"},{\"control_type\":\"text\",\"label\":\"Zipcode\",\"type\":\"string\",\"name\":\"zipcode\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Lat\",\"type\":\"string\",\"name\":\"lat\"},{\"control_type\":\"text\",\"label\":\"Lng\",\"type\":\"string\",\"name\":\"lng\"}],\"label\":\"Geo\",\"type\":\"object\",\"name\":\"geo\"}],\"label\":\"Address\",\"type\":\"object\",\"name\":\"address\"},{\"control_type\":\"text\",\"label\":\"Phone\",\"type\":\"string\",\"name\":\"phone\"},{\"control_type\":\"text\",\"label\":\"Website\",\"type\":\"string\",\"name\":\"website\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Catch phrase\",\"type\":\"string\",\"name\":\"catchPhrase\"},{\"control_type\":\"text\",\"label\":\"Bs\",\"type\":\"string\",\"name\":\"bs\"}],\"label\":\"Company\",\"type\":\"object\",\"name\":\"company\"}]",
+                "headers_schema": "[{\"control_type\":\"date_time\",\"label\":\"Date\",\"render_input\":\"date_time_conversion\",\"parse_output\":\"date_time_conversion\",\"type\":\"date_time\",\"name\":\"date\"},{\"control_type\":\"text\",\"label\":\"Content type\",\"type\":\"string\",\"name\":\"content_type\"},{\"control_type\":\"text\",\"label\":\"Transfer encoding\",\"type\":\"string\",\"name\":\"transfer_encoding\"},{\"control_type\":\"text\",\"label\":\"Connection\",\"type\":\"string\",\"name\":\"connection\"},{\"control_type\":\"text\",\"label\":\"Access control allow credentials\",\"type\":\"string\",\"name\":\"access_control_allow_credentials\"},{\"control_type\":\"text\",\"label\":\"Cache control\",\"type\":\"string\",\"name\":\"cache_control\"},{\"control_type\":\"text\",\"label\":\"Etag\",\"type\":\"string\",\"name\":\"etag\"},{\"control_type\":\"text\",\"label\":\"Expires\",\"type\":\"string\",\"name\":\"expires\"},{\"control_type\":\"text\",\"label\":\"Pragma\",\"type\":\"string\",\"name\":\"pragma\"},{\"control_type\":\"text\",\"label\":\"Vary\",\"type\":\"string\",\"name\":\"vary\"},{\"control_type\":\"text\",\"label\":\"X content type options\",\"type\":\"string\",\"name\":\"x_content_type_options\"},{\"control_type\":\"text\",\"label\":\"X powered by\",\"type\":\"string\",\"name\":\"x_powered_by\"},{\"control_type\":\"text\",\"label\":\"X ratelimit limit\",\"type\":\"string\",\"name\":\"x_ratelimit_limit\"},{\"control_type\":\"text\",\"label\":\"X ratelimit remaining\",\"type\":\"string\",\"name\":\"x_ratelimit_remaining\"},{\"control_type\":\"text\",\"label\":\"X ratelimit reset\",\"type\":\"string\",\"name\":\"x_ratelimit_reset\"},{\"control_type\":\"text\",\"label\":\"Age\",\"type\":\"string\",\"name\":\"age\"},{\"control_type\":\"text\",\"label\":\"Report to\",\"type\":\"string\",\"name\":\"report_to\"},{\"control_type\":\"text\",\"label\":\"Cf cache status\",\"type\":\"string\",\"name\":\"cf_cache_status\"},{\"control_type\":\"text\",\"label\":\"Nel\",\"type\":\"string\",\"name\":\"nel\"},{\"control_type\":\"text\",\"label\":\"Server\",\"type\":\"string\",\"name\":\"server\"},{\"control_type\":\"text\",\"label\":\"Cf ray\",\"type\":\"string\",\"name\":\"cf_ray\"},{\"control_type\":\"text\",\"label\":\"Alt svc\",\"type\":\"string\",\"name\":\"alt_svc\"}]"
+              },
+              "wait_for_response": "false",
+              "completion_threshold_seconds": "3600",
+              "disable_retries": "false",
+              "enable_streaming": "false"
+            },
+            "extended_output_schema": [
+              {
+                "label": "Headers",
+                "name": "headers",
+                "properties": [
+                  {
+                    "control_type": "date_time",
+                    "label": "Date",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "type": "date_time",
+                    "name": "date"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Content type",
+                    "type": "string",
+                    "name": "content_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Transfer encoding",
+                    "type": "string",
+                    "name": "transfer_encoding"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Connection",
+                    "type": "string",
+                    "name": "connection"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Access control allow credentials",
+                    "type": "string",
+                    "name": "access_control_allow_credentials"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cache control",
+                    "type": "string",
+                    "name": "cache_control"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Etag",
+                    "type": "string",
+                    "name": "etag"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Expires",
+                    "type": "string",
+                    "name": "expires"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Pragma",
+                    "type": "string",
+                    "name": "pragma"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Vary",
+                    "type": "string",
+                    "name": "vary"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X content type options",
+                    "type": "string",
+                    "name": "x_content_type_options"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X powered by",
+                    "type": "string",
+                    "name": "x_powered_by"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit limit",
+                    "type": "string",
+                    "name": "x_ratelimit_limit"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit remaining",
+                    "type": "string",
+                    "name": "x_ratelimit_remaining"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit reset",
+                    "type": "string",
+                    "name": "x_ratelimit_reset"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Age",
+                    "type": "string",
+                    "name": "age"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Report to",
+                    "type": "string",
+                    "name": "report_to"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf cache status",
+                    "type": "string",
+                    "name": "cf_cache_status"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Nel",
+                    "type": "string",
+                    "name": "nel"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Server",
+                    "type": "string",
+                    "name": "server"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf ray",
+                    "type": "string",
+                    "name": "cf_ray"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Alt svc",
+                    "type": "string",
+                    "name": "alt_svc"
+                  }
+                ],
+                "type": "object"
+              },
+              {
+                "label": "Response",
+                "name": "response",
+                "properties": [
+                  {
+                    "control_type": "number",
+                    "label": "ID",
+                    "parse_output": "float_conversion",
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "type": "string",
+                    "name": "name"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "type": "string",
+                    "name": "email"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Street",
+                        "type": "string",
+                        "name": "street"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Suite",
+                        "type": "string",
+                        "name": "suite"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "City",
+                        "type": "string",
+                        "name": "city"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Zipcode",
+                        "type": "string",
+                        "name": "zipcode"
+                      },
+                      {
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Lat",
+                            "type": "string",
+                            "name": "lat"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Lng",
+                            "type": "string",
+                            "name": "lng"
+                          }
+                        ],
+                        "label": "Geo",
+                        "type": "object",
+                        "name": "geo"
+                      }
+                    ],
+                    "label": "Address",
+                    "type": "object",
+                    "name": "address"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Phone",
+                    "type": "string",
+                    "name": "phone"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Website",
+                    "type": "string",
+                    "name": "website"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "type": "string",
+                        "name": "name"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Catch phrase",
+                        "type": "string",
+                        "name": "catchPhrase"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Bs",
+                        "type": "string",
+                        "name": "bs"
+                      }
+                    ],
+                    "label": "Company",
+                    "type": "object",
+                    "name": "company"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Response",
+                "name": "response",
+                "override": true,
+                "properties": [
+                  {
+                    "control_type": "select",
+                    "label": "Response content type",
+                    "pick_list": [
+                      [
+                        "Text",
+                        "rawdatatxt"
+                      ],
+                      [
+                        "Binary",
+                        "rawdata"
+                      ],
+                      [
+                        "JSON",
+                        "json"
+                      ],
+                      [
+                        "XML",
+                        "xml2"
+                      ],
+                      [
+                        "Multipart",
+                        "multipart"
+                      ]
+                    ],
+                    "hint": "Select expected format of data response type, e.g. JSON or XML. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "default": "json",
+                    "extends_schema": true,
+                    "type": "string",
+                    "name": "output_type"
+                  },
+                  {
+                    "control_type": "select",
+                    "label": "Encoding",
+                    "pick_list": "supported_encodings_without_binary_global_pick_list",
+                    "pick_list_connection_less": true,
+                    "optional": true,
+                    "default": "UTF-8",
+                    "hint": "Default encoding type is set to UTF-8, and typically doesn't need to be changed. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "type": "string",
+                    "name": "expected_encoding"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Response schema",
+                    "sample_data_type": "json_http",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all fields in your response.",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "response_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "HTTP response headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all the response headers",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "headers_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Multipart part headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe headers within each multipart part",
+                    "optional": true,
+                    "sticky": true,
+                    "hint": "Define the headers that appear in each part of the multipart response (e.g., Content-Type, Content-ID)",
+                    "ngIf": "input.response.output_type == 'multipart'",
+                    "type": "string",
+                    "name": "part_headers_schema"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Mark non-2xx response codes as success?",
+                    "default": "false",
+                    "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Mark non-2xx response codes as success?",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "default": false,
+                      "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                      "optional": true,
+                      "render_input": null,
+                      "parse_output": null,
+                      "type": "boolean",
+                      "name": "ignore_http_errors"
+                    },
+                    "type": "boolean",
+                    "name": "ignore_http_errors"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "a5bb5c3e-2429-4f8e-bb76-e261fa6a5bd0",
+            "wizardFinished": true
+          },
+          {
+            "number": 13,
+            "as": "824c7891",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 14,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "f88a48ca",
+                "keyword": "action",
+                "input": {
+                  "message": "Failed"
+                },
+                "uuid": "7341891a-8665-4cc5-9f29-85e5d8e3d016"
+              }
+            ],
+            "uuid": "923153da-ba64-417c-846b-7d4fa25be77f"
+          }
+        ],
+        "uuid": "c36ba104-7900-435a-80b0-53f4957bb4d6"
+      },
+      {
+        "number": 15,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 16,
+            "provider": "rest_secondary",
+            "name": "make_request_v2",
+            "as": "e7d6f60c",
+            "keyword": "action",
+            "toggleCfg": {
+              "response.ignore_http_errors": true,
+              "disable_retries": true
+            },
+            "input": {
+              "request_name": "Send request",
+              "request": {
+                "method": "GET",
+                "content_type": "application/json",
+                "url": "#{_dp('{\"pill_type\":\"project_property\",\"property_name\":\"Get Tasks\"}')}"
+              },
+              "response": {
+                "output_type": "json",
+                "expected_encoding": "UTF-8",
+                "ignore_http_errors": "false",
+                "response_schema": "[{\"control_type\":\"number\",\"label\":\"ID\",\"parse_output\":\"float_conversion\",\"type\":\"number\",\"name\":\"id\"},{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Username\",\"type\":\"string\",\"name\":\"username\"},{\"control_type\":\"text\",\"label\":\"Email\",\"type\":\"string\",\"name\":\"email\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Street\",\"type\":\"string\",\"name\":\"street\"},{\"control_type\":\"text\",\"label\":\"Suite\",\"type\":\"string\",\"name\":\"suite\"},{\"control_type\":\"text\",\"label\":\"City\",\"type\":\"string\",\"name\":\"city\"},{\"control_type\":\"text\",\"label\":\"Zipcode\",\"type\":\"string\",\"name\":\"zipcode\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Lat\",\"type\":\"string\",\"name\":\"lat\"},{\"control_type\":\"text\",\"label\":\"Lng\",\"type\":\"string\",\"name\":\"lng\"}],\"label\":\"Geo\",\"type\":\"object\",\"name\":\"geo\"}],\"label\":\"Address\",\"type\":\"object\",\"name\":\"address\"},{\"control_type\":\"text\",\"label\":\"Phone\",\"type\":\"string\",\"name\":\"phone\"},{\"control_type\":\"text\",\"label\":\"Website\",\"type\":\"string\",\"name\":\"website\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Catch phrase\",\"type\":\"string\",\"name\":\"catchPhrase\"},{\"control_type\":\"text\",\"label\":\"Bs\",\"type\":\"string\",\"name\":\"bs\"}],\"label\":\"Company\",\"type\":\"object\",\"name\":\"company\"}]",
+                "headers_schema": "[{\"control_type\":\"date_time\",\"label\":\"Date\",\"render_input\":\"date_time_conversion\",\"parse_output\":\"date_time_conversion\",\"type\":\"date_time\",\"name\":\"date\"},{\"control_type\":\"text\",\"label\":\"Content type\",\"type\":\"string\",\"name\":\"content_type\"},{\"control_type\":\"text\",\"label\":\"Transfer encoding\",\"type\":\"string\",\"name\":\"transfer_encoding\"},{\"control_type\":\"text\",\"label\":\"Connection\",\"type\":\"string\",\"name\":\"connection\"},{\"control_type\":\"text\",\"label\":\"Access control allow credentials\",\"type\":\"string\",\"name\":\"access_control_allow_credentials\"},{\"control_type\":\"text\",\"label\":\"Cache control\",\"type\":\"string\",\"name\":\"cache_control\"},{\"control_type\":\"text\",\"label\":\"Etag\",\"type\":\"string\",\"name\":\"etag\"},{\"control_type\":\"text\",\"label\":\"Expires\",\"type\":\"string\",\"name\":\"expires\"},{\"control_type\":\"text\",\"label\":\"Pragma\",\"type\":\"string\",\"name\":\"pragma\"},{\"control_type\":\"text\",\"label\":\"Vary\",\"type\":\"string\",\"name\":\"vary\"},{\"control_type\":\"text\",\"label\":\"X content type options\",\"type\":\"string\",\"name\":\"x_content_type_options\"},{\"control_type\":\"text\",\"label\":\"X powered by\",\"type\":\"string\",\"name\":\"x_powered_by\"},{\"control_type\":\"text\",\"label\":\"X ratelimit limit\",\"type\":\"string\",\"name\":\"x_ratelimit_limit\"},{\"control_type\":\"text\",\"label\":\"X ratelimit remaining\",\"type\":\"string\",\"name\":\"x_ratelimit_remaining\"},{\"control_type\":\"text\",\"label\":\"X ratelimit reset\",\"type\":\"string\",\"name\":\"x_ratelimit_reset\"},{\"control_type\":\"text\",\"label\":\"Age\",\"type\":\"string\",\"name\":\"age\"},{\"control_type\":\"text\",\"label\":\"Report to\",\"type\":\"string\",\"name\":\"report_to\"},{\"control_type\":\"text\",\"label\":\"Cf cache status\",\"type\":\"string\",\"name\":\"cf_cache_status\"},{\"control_type\":\"text\",\"label\":\"Nel\",\"type\":\"string\",\"name\":\"nel\"},{\"control_type\":\"text\",\"label\":\"Server\",\"type\":\"string\",\"name\":\"server\"},{\"control_type\":\"text\",\"label\":\"Cf ray\",\"type\":\"string\",\"name\":\"cf_ray\"},{\"control_type\":\"text\",\"label\":\"Alt svc\",\"type\":\"string\",\"name\":\"alt_svc\"}]"
+              },
+              "wait_for_response": "false",
+              "completion_threshold_seconds": "3600",
+              "disable_retries": "false",
+              "enable_streaming": "false"
+            },
+            "extended_output_schema": [
+              {
+                "label": "Headers",
+                "name": "headers",
+                "properties": [
+                  {
+                    "control_type": "date_time",
+                    "label": "Date",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "type": "date_time",
+                    "name": "date"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Content type",
+                    "type": "string",
+                    "name": "content_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Transfer encoding",
+                    "type": "string",
+                    "name": "transfer_encoding"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Connection",
+                    "type": "string",
+                    "name": "connection"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Access control allow credentials",
+                    "type": "string",
+                    "name": "access_control_allow_credentials"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cache control",
+                    "type": "string",
+                    "name": "cache_control"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Etag",
+                    "type": "string",
+                    "name": "etag"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Expires",
+                    "type": "string",
+                    "name": "expires"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Pragma",
+                    "type": "string",
+                    "name": "pragma"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Vary",
+                    "type": "string",
+                    "name": "vary"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X content type options",
+                    "type": "string",
+                    "name": "x_content_type_options"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X powered by",
+                    "type": "string",
+                    "name": "x_powered_by"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit limit",
+                    "type": "string",
+                    "name": "x_ratelimit_limit"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit remaining",
+                    "type": "string",
+                    "name": "x_ratelimit_remaining"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "X ratelimit reset",
+                    "type": "string",
+                    "name": "x_ratelimit_reset"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Age",
+                    "type": "string",
+                    "name": "age"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Report to",
+                    "type": "string",
+                    "name": "report_to"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf cache status",
+                    "type": "string",
+                    "name": "cf_cache_status"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Nel",
+                    "type": "string",
+                    "name": "nel"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Server",
+                    "type": "string",
+                    "name": "server"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Cf ray",
+                    "type": "string",
+                    "name": "cf_ray"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Alt svc",
+                    "type": "string",
+                    "name": "alt_svc"
+                  }
+                ],
+                "type": "object"
+              },
+              {
+                "label": "Response",
+                "name": "response",
+                "properties": [
+                  {
+                    "control_type": "number",
+                    "label": "ID",
+                    "parse_output": "float_conversion",
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "type": "string",
+                    "name": "name"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "type": "string",
+                    "name": "email"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Street",
+                        "type": "string",
+                        "name": "street"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Suite",
+                        "type": "string",
+                        "name": "suite"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "City",
+                        "type": "string",
+                        "name": "city"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Zipcode",
+                        "type": "string",
+                        "name": "zipcode"
+                      },
+                      {
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Lat",
+                            "type": "string",
+                            "name": "lat"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Lng",
+                            "type": "string",
+                            "name": "lng"
+                          }
+                        ],
+                        "label": "Geo",
+                        "type": "object",
+                        "name": "geo"
+                      }
+                    ],
+                    "label": "Address",
+                    "type": "object",
+                    "name": "address"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Phone",
+                    "type": "string",
+                    "name": "phone"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Website",
+                    "type": "string",
+                    "name": "website"
+                  },
+                  {
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "type": "string",
+                        "name": "name"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Catch phrase",
+                        "type": "string",
+                        "name": "catchPhrase"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Bs",
+                        "type": "string",
+                        "name": "bs"
+                      }
+                    ],
+                    "label": "Company",
+                    "type": "object",
+                    "name": "company"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Response",
+                "name": "response",
+                "override": true,
+                "properties": [
+                  {
+                    "control_type": "select",
+                    "label": "Response content type",
+                    "pick_list": [
+                      [
+                        "Text",
+                        "rawdatatxt"
+                      ],
+                      [
+                        "Binary",
+                        "rawdata"
+                      ],
+                      [
+                        "JSON",
+                        "json"
+                      ],
+                      [
+                        "XML",
+                        "xml2"
+                      ],
+                      [
+                        "Multipart",
+                        "multipart"
+                      ]
+                    ],
+                    "hint": "Select expected format of data response type, e.g. JSON or XML. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "default": "json",
+                    "extends_schema": true,
+                    "type": "string",
+                    "name": "output_type"
+                  },
+                  {
+                    "control_type": "select",
+                    "label": "Encoding",
+                    "pick_list": "supported_encodings_without_binary_global_pick_list",
+                    "pick_list_connection_less": true,
+                    "optional": true,
+                    "default": "UTF-8",
+                    "hint": "Default encoding type is set to UTF-8, and typically doesn't need to be changed. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                    "type": "string",
+                    "name": "expected_encoding"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Response schema",
+                    "sample_data_type": "json_http",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all fields in your response.",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "response_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "HTTP response headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe all the response headers",
+                    "optional": true,
+                    "sticky": true,
+                    "type": "string",
+                    "name": "headers_schema"
+                  },
+                  {
+                    "control_type": "schema-designer",
+                    "label": "Multipart part headers",
+                    "extends_schema": true,
+                    "empty_schema_title": "Describe headers within each multipart part",
+                    "optional": true,
+                    "sticky": true,
+                    "hint": "Define the headers that appear in each part of the multipart response (e.g., Content-Type, Content-ID)",
+                    "ngIf": "input.response.output_type == 'multipart'",
+                    "type": "string",
+                    "name": "part_headers_schema"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Mark non-2xx response codes as success?",
+                    "default": "false",
+                    "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Mark non-2xx response codes as success?",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "default": false,
+                      "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                      "optional": true,
+                      "render_input": null,
+                      "parse_output": null,
+                      "type": "boolean",
+                      "name": "ignore_http_errors"
+                    },
+                    "type": "boolean",
+                    "name": "ignore_http_errors"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "4097cd2f-6218-4c31-b9e3-786fb7f5df91",
+            "wizardFinished": true
+          },
+          {
+            "number": 17,
+            "as": "0e641db1",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 18,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "0a87e12f",
+                "keyword": "action",
+                "input": {
+                  "message": "Failed"
+                },
+                "uuid": "0adb4624-a585-4728-8dc5-88f59f682d1e"
+              },
+              {
+                "number": 19,
+                "keyword": "try",
+                "input": {
+                },
+                "block": [
+                  {
+                    "number": 20,
+                    "provider": "rest_secondary",
+                    "name": "make_request_v2",
+                    "as": "9e6040f2",
+                    "keyword": "action",
+                    "toggleCfg": {
+                      "response.ignore_http_errors": true,
+                      "disable_retries": true
+                    },
+                    "input": {
+                      "request_name": "Send request",
+                      "request": {
+                        "method": "GET",
+                        "content_type": "application/json",
+                        "url": "#{_dp('{\"pill_type\":\"project_property\",\"property_name\":\"Get Albums\"}')}"
+                      },
+                      "response": {
+                        "output_type": "json",
+                        "expected_encoding": "UTF-8",
+                        "ignore_http_errors": "false",
+                        "response_schema": "[{\"control_type\":\"number\",\"label\":\"ID\",\"parse_output\":\"float_conversion\",\"type\":\"number\",\"name\":\"id\"},{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Username\",\"type\":\"string\",\"name\":\"username\"},{\"control_type\":\"text\",\"label\":\"Email\",\"type\":\"string\",\"name\":\"email\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Street\",\"type\":\"string\",\"name\":\"street\"},{\"control_type\":\"text\",\"label\":\"Suite\",\"type\":\"string\",\"name\":\"suite\"},{\"control_type\":\"text\",\"label\":\"City\",\"type\":\"string\",\"name\":\"city\"},{\"control_type\":\"text\",\"label\":\"Zipcode\",\"type\":\"string\",\"name\":\"zipcode\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Lat\",\"type\":\"string\",\"name\":\"lat\"},{\"control_type\":\"text\",\"label\":\"Lng\",\"type\":\"string\",\"name\":\"lng\"}],\"label\":\"Geo\",\"type\":\"object\",\"name\":\"geo\"}],\"label\":\"Address\",\"type\":\"object\",\"name\":\"address\"},{\"control_type\":\"text\",\"label\":\"Phone\",\"type\":\"string\",\"name\":\"phone\"},{\"control_type\":\"text\",\"label\":\"Website\",\"type\":\"string\",\"name\":\"website\"},{\"properties\":[{\"control_type\":\"text\",\"label\":\"Name\",\"type\":\"string\",\"name\":\"name\"},{\"control_type\":\"text\",\"label\":\"Catch phrase\",\"type\":\"string\",\"name\":\"catchPhrase\"},{\"control_type\":\"text\",\"label\":\"Bs\",\"type\":\"string\",\"name\":\"bs\"}],\"label\":\"Company\",\"type\":\"object\",\"name\":\"company\"}]",
+                        "headers_schema": "[{\"control_type\":\"date_time\",\"label\":\"Date\",\"render_input\":\"date_time_conversion\",\"parse_output\":\"date_time_conversion\",\"type\":\"date_time\",\"name\":\"date\"},{\"control_type\":\"text\",\"label\":\"Content type\",\"type\":\"string\",\"name\":\"content_type\"},{\"control_type\":\"text\",\"label\":\"Transfer encoding\",\"type\":\"string\",\"name\":\"transfer_encoding\"},{\"control_type\":\"text\",\"label\":\"Connection\",\"type\":\"string\",\"name\":\"connection\"},{\"control_type\":\"text\",\"label\":\"Access control allow credentials\",\"type\":\"string\",\"name\":\"access_control_allow_credentials\"},{\"control_type\":\"text\",\"label\":\"Cache control\",\"type\":\"string\",\"name\":\"cache_control\"},{\"control_type\":\"text\",\"label\":\"Etag\",\"type\":\"string\",\"name\":\"etag\"},{\"control_type\":\"text\",\"label\":\"Expires\",\"type\":\"string\",\"name\":\"expires\"},{\"control_type\":\"text\",\"label\":\"Pragma\",\"type\":\"string\",\"name\":\"pragma\"},{\"control_type\":\"text\",\"label\":\"Vary\",\"type\":\"string\",\"name\":\"vary\"},{\"control_type\":\"text\",\"label\":\"X content type options\",\"type\":\"string\",\"name\":\"x_content_type_options\"},{\"control_type\":\"text\",\"label\":\"X powered by\",\"type\":\"string\",\"name\":\"x_powered_by\"},{\"control_type\":\"text\",\"label\":\"X ratelimit limit\",\"type\":\"string\",\"name\":\"x_ratelimit_limit\"},{\"control_type\":\"text\",\"label\":\"X ratelimit remaining\",\"type\":\"string\",\"name\":\"x_ratelimit_remaining\"},{\"control_type\":\"text\",\"label\":\"X ratelimit reset\",\"type\":\"string\",\"name\":\"x_ratelimit_reset\"},{\"control_type\":\"text\",\"label\":\"Age\",\"type\":\"string\",\"name\":\"age\"},{\"control_type\":\"text\",\"label\":\"Report to\",\"type\":\"string\",\"name\":\"report_to\"},{\"control_type\":\"text\",\"label\":\"Cf cache status\",\"type\":\"string\",\"name\":\"cf_cache_status\"},{\"control_type\":\"text\",\"label\":\"Nel\",\"type\":\"string\",\"name\":\"nel\"},{\"control_type\":\"text\",\"label\":\"Server\",\"type\":\"string\",\"name\":\"server\"},{\"control_type\":\"text\",\"label\":\"Cf ray\",\"type\":\"string\",\"name\":\"cf_ray\"},{\"control_type\":\"text\",\"label\":\"Alt svc\",\"type\":\"string\",\"name\":\"alt_svc\"}]"
+                      },
+                      "wait_for_response": "false",
+                      "completion_threshold_seconds": "3600",
+                      "disable_retries": "false",
+                      "enable_streaming": "false"
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Headers",
+                        "name": "headers",
+                        "properties": [
+                          {
+                            "control_type": "date_time",
+                            "label": "Date",
+                            "render_input": "date_time_conversion",
+                            "parse_output": "date_time_conversion",
+                            "type": "date_time",
+                            "name": "date"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Content type",
+                            "type": "string",
+                            "name": "content_type"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Transfer encoding",
+                            "type": "string",
+                            "name": "transfer_encoding"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Connection",
+                            "type": "string",
+                            "name": "connection"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Access control allow credentials",
+                            "type": "string",
+                            "name": "access_control_allow_credentials"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Cache control",
+                            "type": "string",
+                            "name": "cache_control"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Etag",
+                            "type": "string",
+                            "name": "etag"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Expires",
+                            "type": "string",
+                            "name": "expires"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Pragma",
+                            "type": "string",
+                            "name": "pragma"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Vary",
+                            "type": "string",
+                            "name": "vary"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "X content type options",
+                            "type": "string",
+                            "name": "x_content_type_options"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "X powered by",
+                            "type": "string",
+                            "name": "x_powered_by"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "X ratelimit limit",
+                            "type": "string",
+                            "name": "x_ratelimit_limit"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "X ratelimit remaining",
+                            "type": "string",
+                            "name": "x_ratelimit_remaining"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "X ratelimit reset",
+                            "type": "string",
+                            "name": "x_ratelimit_reset"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Age",
+                            "type": "string",
+                            "name": "age"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Report to",
+                            "type": "string",
+                            "name": "report_to"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Cf cache status",
+                            "type": "string",
+                            "name": "cf_cache_status"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Nel",
+                            "type": "string",
+                            "name": "nel"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Server",
+                            "type": "string",
+                            "name": "server"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Cf ray",
+                            "type": "string",
+                            "name": "cf_ray"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Alt svc",
+                            "type": "string",
+                            "name": "alt_svc"
+                          }
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "label": "Response",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "number",
+                            "label": "ID",
+                            "parse_output": "float_conversion",
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Name",
+                            "type": "string",
+                            "name": "name"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Username",
+                            "type": "string",
+                            "name": "username"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Email",
+                            "type": "string",
+                            "name": "email"
+                          },
+                          {
+                            "properties": [
+                              {
+                                "control_type": "text",
+                                "label": "Street",
+                                "type": "string",
+                                "name": "street"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Suite",
+                                "type": "string",
+                                "name": "suite"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "City",
+                                "type": "string",
+                                "name": "city"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Zipcode",
+                                "type": "string",
+                                "name": "zipcode"
+                              },
+                              {
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "Lat",
+                                    "type": "string",
+                                    "name": "lat"
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Lng",
+                                    "type": "string",
+                                    "name": "lng"
+                                  }
+                                ],
+                                "label": "Geo",
+                                "type": "object",
+                                "name": "geo"
+                              }
+                            ],
+                            "label": "Address",
+                            "type": "object",
+                            "name": "address"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Phone",
+                            "type": "string",
+                            "name": "phone"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Website",
+                            "type": "string",
+                            "name": "website"
+                          },
+                          {
+                            "properties": [
+                              {
+                                "control_type": "text",
+                                "label": "Name",
+                                "type": "string",
+                                "name": "name"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Catch phrase",
+                                "type": "string",
+                                "name": "catchPhrase"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Bs",
+                                "type": "string",
+                                "name": "bs"
+                              }
+                            ],
+                            "label": "Company",
+                            "type": "object",
+                            "name": "company"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "label": "Response",
+                        "name": "response",
+                        "override": true,
+                        "properties": [
+                          {
+                            "control_type": "select",
+                            "label": "Response content type",
+                            "pick_list": [
+                              [
+                                "Text",
+                                "rawdatatxt"
+                              ],
+                              [
+                                "Binary",
+                                "rawdata"
+                              ],
+                              [
+                                "JSON",
+                                "json"
+                              ],
+                              [
+                                "XML",
+                                "xml2"
+                              ],
+                              [
+                                "Multipart",
+                                "multipart"
+                              ]
+                            ],
+                            "hint": "Select expected format of data response type, e.g. JSON or XML. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                            "default": "json",
+                            "extends_schema": true,
+                            "type": "string",
+                            "name": "output_type"
+                          },
+                          {
+                            "control_type": "select",
+                            "label": "Encoding",
+                            "pick_list": "supported_encodings_without_binary_global_pick_list",
+                            "pick_list_connection_less": true,
+                            "optional": true,
+                            "default": "UTF-8",
+                            "hint": "Default encoding type is set to UTF-8, and typically doesn't need to be changed. <a href=\"https://docs.workato.com/developing-connectors/http.html#response-type\" target=\"_blank\">Learn more</a>",
+                            "type": "string",
+                            "name": "expected_encoding"
+                          },
+                          {
+                            "control_type": "schema-designer",
+                            "label": "Response schema",
+                            "sample_data_type": "json_http",
+                            "extends_schema": true,
+                            "empty_schema_title": "Describe all fields in your response.",
+                            "optional": true,
+                            "sticky": true,
+                            "type": "string",
+                            "name": "response_schema"
+                          },
+                          {
+                            "control_type": "schema-designer",
+                            "label": "HTTP response headers",
+                            "extends_schema": true,
+                            "empty_schema_title": "Describe all the response headers",
+                            "optional": true,
+                            "sticky": true,
+                            "type": "string",
+                            "name": "headers_schema"
+                          },
+                          {
+                            "control_type": "schema-designer",
+                            "label": "Multipart part headers",
+                            "extends_schema": true,
+                            "empty_schema_title": "Describe headers within each multipart part",
+                            "optional": true,
+                            "sticky": true,
+                            "hint": "Define the headers that appear in each part of the multipart response (e.g., Content-Type, Content-ID)",
+                            "ngIf": "input.response.output_type == 'multipart'",
+                            "type": "string",
+                            "name": "part_headers_schema"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Mark non-2xx response codes as success?",
+                            "default": "false",
+                            "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                            "optional": true,
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Mark non-2xx response codes as success?",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "default": false,
+                              "hint": "If <b>yes</b>, non 2xx response codes returned will be marked as a successful action. If <b>no</b>, non 2xx response codes returned will be marked as an error.",
+                              "optional": true,
+                              "render_input": null,
+                              "parse_output": null,
+                              "type": "boolean",
+                              "name": "ignore_http_errors"
+                            },
+                            "type": "boolean",
+                            "name": "ignore_http_errors"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "44a1e62e-250d-4c1b-9e1f-3f509c52bc27",
+                    "wizardFinished": true
+                  },
+                  {
+                    "number": 21,
+                    "as": "f457695e",
+                    "keyword": "catch",
+                    "input": {
+                      "max_retry_count": "0",
+                      "retry_interval": "2"
+                    },
+                    "block": [
+                      {
+                        "number": 22,
+                        "provider": "logger",
+                        "name": "log_message",
+                        "as": "59697b06",
+                        "keyword": "action",
+                        "input": {
+                          "message": "Failed"
+                        },
+                        "uuid": "48a5f0a5-09ae-4316-8954-68523328fa30"
+                      }
+                    ],
+                    "uuid": "5e1ecc9c-bbe9-4494-89ae-7fe376508f81"
+                  }
+                ],
+                "uuid": "dc541d8a-1847-4b00-98ea-fe0b18595a7c"
+              }
+            ],
+            "uuid": "f00b57fb-64a2-46fe-b4d5-365f49bd10ca"
+          }
+        ],
+        "uuid": "5b3a861d-48f3-4395-a626-0d42e63efdd1"
+      }
+    ],
+    "uuid": "f92f41f9-527d-4c8f-84e2-ca6d3a5e41bc"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "clock",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "rest_secondary",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "TEST PROJECT/mina_http_connection.connection.json",
+        "name": "Mina HTTP Connection ",
+        "folder": "TEST PROJECT"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

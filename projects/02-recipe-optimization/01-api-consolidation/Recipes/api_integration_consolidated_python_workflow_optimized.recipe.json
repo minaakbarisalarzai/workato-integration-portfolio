@@ -1,0 +1,383 @@
+{
+  "name": "API Integration — Consolidated Python Workflow (Optimized)",
+  "description": "",
+  "version": 3,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "clock",
+    "name": "scheduled_event",
+    "as": "1b78e7e1",
+    "keyword": "trigger",
+    "input": {
+      "time_unit": "minutes",
+      "trigger_every": "5"
+    },
+    "extended_input_schema": [
+      {
+        "control_type": "integer",
+        "default": "5",
+        "enforce_template_mode": true,
+        "extends_schema": true,
+        "hint": "Define repeating schedule. Enter whole numbers only.This field can be set to a minimum of 5 minutes.",
+        "label": "Trigger every",
+        "name": "trigger_every",
+        "optional": false,
+        "suffix": {
+          "text": "minutes"
+        },
+        "type": "string"
+      },
+      {
+        "control_type": "select",
+        "hint": "Select the timezone to use. Leave it blank to use <b>{{authUser.account_timezone}}</b>",
+        "label": "Timezone",
+        "name": "timezone",
+        "optional": true,
+        "pick_list": "timezone_id_global_pick_list",
+        "pick_list_connection_less": true,
+        "type": "string"
+      },
+      {
+        "control_type": "date_time",
+        "enforce_template_mode": true,
+        "extends_schema": true,
+        "hint": "Set date and time to start or leave blank to start immediately. <b>Once recipe has been run or tested, value cannot be changed.</b>",
+        "label": "Start after",
+        "name": "start_after",
+        "optional": true,
+        "parse_output": "date_time_conversion",
+        "since_field": true,
+        "type": "date_time",
+        "ignore_timezone": true,
+        "render_input": "date_time_conversion"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "provider": "py_eval",
+        "name": "invoke_custom_py_code",
+        "as": "4b5fdddc",
+        "keyword": "action",
+        "input": {
+          "payload_asset_type": "inline",
+          "code": "\n\"\"\"\nProject: Workato Recipe Optimization\nCase study: Five HTTP actions consolidated into one Python action\n\nPurpose:\n    Retrieve related public API resources and apply validation,\n    controlled retries, and business rules in a single Workato step.\n\nSecurity:\n    Public demonstration API only. No authentication credentials.\n\nNote:\n    This code is designed for Workato's Python snippets action.\n    Live execution and output mapping must be verified in Workato.\n\"\"\"\n\nimport time\nimport requests\n\nBASE_URL = \"https://jsonplaceholder.typicode.com\"\nTIMEOUT_SECONDS = 8\nMAX_ATTEMPTS = 2\nRETRYABLE_STATUSES = {429, 500, 502, 503, 504}\n\nRESOURCES = [\n    (\"user\", \"/users/{user_id}\"),\n    (\"posts\", \"/posts?userId={user_id}\"),\n    (\"comments\", \"/posts/{post_id}/comments\"),\n    (\"todos\", \"/users/{user_id}/todos\"),\n    (\"albums\", \"/users/{user_id}/albums\"),\n]\n\n\ndef main(input):\n    # Workato displays print output in the action's Debug tab.\n    # Do not log credentials or confidential API response bodies.\n\n    def get_integer(value, name):\n        if isinstance(value, bool):\n            raise ValueError(f\"{name} must be a positive integer\")\n\n        try:\n            normalized = str(value).strip()\n            if not normalized.isdigit():\n                raise ValueError()\n            result = int(normalized)\n        except (TypeError, ValueError):\n            raise ValueError(f\"{name} must be a positive integer\")\n\n        if result < 1:\n            raise ValueError(f\"{name} must be greater than zero\")\n\n        return result\n\n    def fetch_resource(session, resource_name, path):\n        url = BASE_URL + path\n\n        for attempt in range(1, MAX_ATTEMPTS + 1):\n            try:\n                response = session.get(\n                    url,\n                    headers={\"Accept\": \"application/json\"},\n                    timeout=TIMEOUT_SECONDS,\n                )\n\n                if response.status_code in RETRYABLE_STATUSES:\n                    if attempt < MAX_ATTEMPTS:\n                        print(\n                            f\"[RETRY] {resource_name}: \"\n                            f\"HTTP {response.status_code}, \"\n                            f\"attempt {attempt}/{MAX_ATTEMPTS}\"\n                        )\n                        time.sleep(1)\n                        continue\n\n                    raise RuntimeError(\n                        f\"{resource_name}: HTTP \"\n                        f\"{response.status_code} after retries\"\n                    )\n\n                if response.status_code >= 400:\n                    raise RuntimeError(\n                        f\"{resource_name}: HTTP \"\n                        f\"{response.status_code}; not retryable\"\n                    )\n\n                try:\n                    return response.json()\n                except ValueError:\n                    raise RuntimeError(\n                        f\"{resource_name}: invalid JSON response\"\n                    )\n\n            except (requests.Timeout, requests.ConnectionError) as exc:\n                if attempt < MAX_ATTEMPTS:\n                    print(\n                        f\"[RETRY] {resource_name}: \"\n                        f\"{type(exc).__name__}, \"\n                        f\"attempt {attempt}/{MAX_ATTEMPTS}\"\n                    )\n                    time.sleep(1)\n                    continue\n\n                raise RuntimeError(\n                    f\"{resource_name}: connection failed \"\n                    f\"after {MAX_ATTEMPTS} attempts\"\n                ) from exc\n\n    # ---------------------------------------------------------\n    # Input validation and initialization\n    # ---------------------------------------------------------\n\n    user_id = get_integer(input.get(\"user_id\", 1), \"user_id\")\n    post_id = get_integer(input.get(\"post_id\", 1), \"post_id\")\n\n    expected_name = str(\n        input.get(\"expected_name\") or \"Leanne Graham\"\n    ).strip()\n\n    results = {}\n    api_calls = 0\n    total_attempts = 0\n    errors = []\n\n    print(f\"[START] Fetching resources for user {user_id}\")\n\n    # ---------------------------------------------------------\n    # Five API operations\n    # ---------------------------------------------------------\n\n    with requests.Session() as session:\n        for resource_name, path_template in RESOURCES:\n            path = path_template.format(\n                user_id=user_id,\n                post_id=post_id,\n            )\n\n            try:\n                # Retry counts are recorded through the logging\n                # mechanism; api_calls tracks logical operations.\n                result = fetch_resource(\n                    session, resource_name, path\n                )\n\n                if resource_name == \"user\":\n                    if not isinstance(result, dict):\n                        raise ValueError(\n                            \"Expected a user object\"\n                        )\n                    if result.get(\"id\") != user_id:\n                        raise ValueError(\n                            \"Returned user ID does not match\"\n                        )\n                elif not isinstance(result, list):\n                    raise ValueError(\n                        f\"Expected an array for {resource_name}\"\n                    )\n\n                results[resource_name] = result\n                api_calls += 1\n                print(f\"[SUCCESS] {resource_name}\")\n\n            except (RuntimeError, ValueError) as exc:\n                errors.append(str(exc))\n                print(\n                    f\"[ERROR] {resource_name}: \"\n                    f\"{str(exc)}\"\n                )\n                break\n\n    # ---------------------------------------------------------\n    # Business condition\n    # ---------------------------------------------------------\n\n    user = results.get(\"user\", {})\n    actual_name = user.get(\"name\", \"\") if user else \"\"\n\n    name_matches = (\n        actual_name == expected_name\n    )\n\n    if user and not name_matches:\n        errors.append(\n            \"User name did not match the expected value\"\n        )\n\n    # ---------------------------------------------------------\n    # Result summary\n    # ---------------------------------------------------------\n\n    success = len(errors) == 0\n\n    summary = {\n        \"user_id\": user_id,\n        \"user_name\": actual_name,\n        \"name_matches\": name_matches,\n        \"posts_count\": len(results.get(\"posts\", [])),\n        \"comments_count\": len(results.get(\"comments\", [])),\n        \"todos_count\": len(results.get(\"todos\", [])),\n        \"albums_count\": len(results.get(\"albums\", [])),\n        \"completed_operations\": api_calls,\n        \"success\": success,\n        \"errors\": errors,\n    }\n\n    print(\n        f\"[COMPLETE] success={success}, \"\n        f\"operations={api_calls}, errors={len(errors)}\"\n    )\n\n    return {\n        \"success\": success,\n        \"name_matches\": name_matches,\n        \"user_name\": actual_name,\n        \"posts_count\": summary[\"posts_count\"],\n        \"comments_count\": summary[\"comments_count\"],\n        \"todos_count\": summary[\"todos_count\"],\n        \"albums_count\": summary[\"albums_count\"],\n        \"completed_operations\": api_calls,\n        \"error_count\": len(errors),\n        \"error_message\": \"; \".join(errors),\n        \"summary\": summary,\n    }\n",
+          "name": "Fetch and Validate Related API Resources",
+          "code_output_schema_json": "[{\"control_type\":\"checkbox\",\"label\":\"Success\",\"render_input\":\"boolean_conversion\",\"parse_output\":\"boolean_conversion\",\"optional\":true,\"toggle_hint\":\"Select from option list\",\"toggle_field\":{\"label\":\"Success\",\"control_type\":\"text\",\"toggle_hint\":\"Use custom value\",\"optional\":true,\"type\":\"boolean\",\"name\":\"success\"},\"type\":\"boolean\",\"name\":\"success\"},{\"control_type\":\"checkbox\",\"label\":\"Name matches\",\"render_input\":\"boolean_conversion\",\"parse_output\":\"boolean_conversion\",\"optional\":true,\"toggle_hint\":\"Select from option list\",\"toggle_field\":{\"label\":\"Name matches\",\"control_type\":\"text\",\"toggle_hint\":\"Use custom value\",\"optional\":true,\"type\":\"boolean\",\"name\":\"name_matches\"},\"type\":\"boolean\",\"name\":\"name_matches\"},{\"control_type\":\"text\",\"label\":\"User name\",\"optional\":true,\"type\":\"string\",\"name\":\"user_name\"},{\"control_type\":\"number\",\"label\":\"Posts count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"posts_count\"},{\"control_type\":\"number\",\"label\":\"Comments count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"comments_count\"},{\"control_type\":\"number\",\"label\":\"Todos count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"todos_count\"},{\"control_type\":\"number\",\"label\":\"Albums count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"albums_count\"},{\"control_type\":\"number\",\"label\":\"Completed operations\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"completed_operations\"},{\"control_type\":\"number\",\"label\":\"Error count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"error_count\"},{\"control_type\":\"text\",\"label\":\"Error message\",\"optional\":true,\"type\":\"string\",\"name\":\"error_message\"},{\"properties\":[{\"control_type\":\"number\",\"label\":\"User ID\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"user_id\"},{\"control_type\":\"text\",\"label\":\"User name\",\"optional\":true,\"type\":\"string\",\"name\":\"user_name\"},{\"control_type\":\"checkbox\",\"label\":\"Name matches\",\"render_input\":\"boolean_conversion\",\"parse_output\":\"boolean_conversion\",\"optional\":true,\"toggle_hint\":\"Select from option list\",\"toggle_field\":{\"label\":\"Name matches\",\"control_type\":\"text\",\"toggle_hint\":\"Use custom value\",\"optional\":true,\"type\":\"boolean\",\"name\":\"name_matches\"},\"type\":\"boolean\",\"name\":\"name_matches\"},{\"control_type\":\"number\",\"label\":\"Posts count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"posts_count\"},{\"control_type\":\"number\",\"label\":\"Comments count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"comments_count\"},{\"control_type\":\"number\",\"label\":\"Todos count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"todos_count\"},{\"control_type\":\"number\",\"label\":\"Albums count\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"albums_count\"},{\"control_type\":\"number\",\"label\":\"Completed operations\",\"parse_output\":\"float_conversion\",\"optional\":true,\"type\":\"number\",\"name\":\"completed_operations\"},{\"control_type\":\"checkbox\",\"label\":\"Success\",\"render_input\":\"boolean_conversion\",\"parse_output\":\"boolean_conversion\",\"optional\":true,\"toggle_hint\":\"Select from option list\",\"toggle_field\":{\"label\":\"Success\",\"control_type\":\"text\",\"toggle_hint\":\"Use custom value\",\"optional\":true,\"type\":\"boolean\",\"name\":\"success\"},\"type\":\"boolean\",\"name\":\"success\"}],\"label\":\"Summary\",\"optional\":true,\"type\":\"object\",\"name\":\"summary\"}]",
+          "code_input": {
+            "schema": "[{\"control_type\":\"text\",\"label\":\"user_id\",\"name\":\"user_id\",\"type\":\"string\",\"optional\":true,\"details\":{\"real_name\":\"user_id\"},\"parent\":[\"code_input\",\"data\"]},{\"control_type\":\"text\",\"label\":\"post_id\",\"name\":\"post_id\",\"type\":\"string\",\"optional\":true,\"details\":{\"real_name\":\"post_id\"},\"parent\":[\"code_input\",\"data\"]},{\"name\":\"expected_name\",\"type\":\"string\",\"optional\":true,\"label\":\"expected_name\",\"details\":{\"real_name\":\"expected_name\"},\"control_type\":\"text\",\"parent\":[\"code_input\",\"data\"]}]",
+            "data": {
+              "user_id": "1",
+              "post_id": "1",
+              "expected_name": "Leanne Graham"
+            }
+          }
+        },
+        "extended_output_schema": [
+          {
+            "label": "Output",
+            "name": "output",
+            "properties": [
+              {
+                "control_type": "checkbox",
+                "label": "Success",
+                "render_input": "boolean_conversion",
+                "parse_output": "boolean_conversion",
+                "optional": true,
+                "toggle_hint": "Select from option list",
+                "toggle_field": {
+                  "label": "Success",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "optional": true,
+                  "type": "boolean",
+                  "name": "success"
+                },
+                "type": "boolean",
+                "name": "success"
+              },
+              {
+                "control_type": "checkbox",
+                "label": "Name matches",
+                "render_input": "boolean_conversion",
+                "parse_output": "boolean_conversion",
+                "optional": true,
+                "toggle_hint": "Select from option list",
+                "toggle_field": {
+                  "label": "Name matches",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "optional": true,
+                  "type": "boolean",
+                  "name": "name_matches"
+                },
+                "type": "boolean",
+                "name": "name_matches"
+              },
+              {
+                "control_type": "text",
+                "label": "User name",
+                "optional": true,
+                "type": "string",
+                "name": "user_name"
+              },
+              {
+                "control_type": "number",
+                "label": "Posts count",
+                "parse_output": "float_conversion",
+                "optional": true,
+                "type": "number",
+                "name": "posts_count"
+              },
+              {
+                "control_type": "number",
+                "label": "Comments count",
+                "parse_output": "float_conversion",
+                "optional": true,
+                "type": "number",
+                "name": "comments_count"
+              },
+              {
+                "control_type": "number",
+                "label": "Todos count",
+                "parse_output": "float_conversion",
+                "optional": true,
+                "type": "number",
+                "name": "todos_count"
+              },
+              {
+                "control_type": "number",
+                "label": "Albums count",
+                "parse_output": "float_conversion",
+                "optional": true,
+                "type": "number",
+                "name": "albums_count"
+              },
+              {
+                "control_type": "number",
+                "label": "Completed operations",
+                "parse_output": "float_conversion",
+                "optional": true,
+                "type": "number",
+                "name": "completed_operations"
+              },
+              {
+                "control_type": "number",
+                "label": "Error count",
+                "parse_output": "float_conversion",
+                "optional": true,
+                "type": "number",
+                "name": "error_count"
+              },
+              {
+                "control_type": "text",
+                "label": "Error message",
+                "optional": true,
+                "type": "string",
+                "name": "error_message"
+              },
+              {
+                "properties": [
+                  {
+                    "control_type": "number",
+                    "label": "User ID",
+                    "parse_output": "float_conversion",
+                    "optional": true,
+                    "type": "number",
+                    "name": "user_id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "User name",
+                    "optional": true,
+                    "type": "string",
+                    "name": "user_name"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Name matches",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Name matches",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "optional": true,
+                      "type": "boolean",
+                      "name": "name_matches"
+                    },
+                    "type": "boolean",
+                    "name": "name_matches"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Posts count",
+                    "parse_output": "float_conversion",
+                    "optional": true,
+                    "type": "number",
+                    "name": "posts_count"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Comments count",
+                    "parse_output": "float_conversion",
+                    "optional": true,
+                    "type": "number",
+                    "name": "comments_count"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Todos count",
+                    "parse_output": "float_conversion",
+                    "optional": true,
+                    "type": "number",
+                    "name": "todos_count"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Albums count",
+                    "parse_output": "float_conversion",
+                    "optional": true,
+                    "type": "number",
+                    "name": "albums_count"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Completed operations",
+                    "parse_output": "float_conversion",
+                    "optional": true,
+                    "type": "number",
+                    "name": "completed_operations"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Success",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Success",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "optional": true,
+                      "type": "boolean",
+                      "name": "success"
+                    },
+                    "type": "boolean",
+                    "name": "success"
+                  }
+                ],
+                "label": "Summary",
+                "optional": true,
+                "type": "object",
+                "name": "summary"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "extended_input_schema": [
+          {
+            "control_type": "form-schema-builder",
+            "hint": "Define the input fields that will be passed to your Python code",
+            "label": "Input fields",
+            "name": "code_input",
+            "optional": true,
+            "override": true,
+            "properties": [
+              {
+                "control_type": "text",
+                "label": "Schema",
+                "extends_schema": true,
+                "type": "string",
+                "name": "schema"
+              },
+              {
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "user_id",
+                    "name": "user_id",
+                    "type": "string",
+                    "optional": true,
+                    "details": {
+                      "real_name": "user_id"
+                    },
+                    "parent": [
+                      "code_input",
+                      "data"
+                    ]
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "post_id",
+                    "name": "post_id",
+                    "type": "string",
+                    "optional": true,
+                    "details": {
+                      "real_name": "post_id"
+                    },
+                    "parent": [
+                      "code_input",
+                      "data"
+                    ]
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "expected_name",
+                    "name": "expected_name",
+                    "type": "string",
+                    "optional": true,
+                    "details": {
+                      "real_name": "expected_name"
+                    },
+                    "parent": [
+                      "code_input",
+                      "data"
+                    ]
+                  }
+                ],
+                "label": "Data",
+                "type": "object",
+                "name": "data"
+              }
+            ],
+            "sticky": true,
+            "type": "object"
+          }
+        ],
+        "visible_config_fields": [
+          "code_input",
+          "code_output_schema_json",
+          "payload_asset_type",
+          "code",
+          "code_input.data.user_id",
+          "code_input.schema",
+          "code_input.data.post_id",
+          "code_input.data.expected_name"
+        ],
+        "uuid": "344d8d64-3a1c-4c61-adb2-4b2ffbd08bf7"
+      }
+    ],
+    "uuid": "fb55af6d-1f2f-4336-9539-3efc892c40e9"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "clock",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "py_eval",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}
