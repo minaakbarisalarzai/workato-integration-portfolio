@@ -1,309 +1,148 @@
 
-# Case Study 01 — Consolidating HTTP Actions into Python
+# Case Study 01 — Workato API Consolidation: HTTP vs Python
 
 **Author:** Mina Akbari  
-**Platform:** Workato  
-**Technologies:** Python, HTTP, REST APIs, JSON  
-**Focus:** Task Efficiency · Cost Optimization · Workflow Simplification
+**Technologies:** Workato, Python, REST APIs, HTTP, JSON  
+**Focus:** Task Optimization · Cost Efficiency · Maintainability
 
 ## Overview
 
-This case study demonstrates how consolidating multiple HTTP connector actions into Python can significantly reduce Workato task consumption and simplify an integration workflow.
+This project demonstrates how consolidating repetitive HTTP actions into Python can reduce Workato task consumption and simplify integration workflows.
 
-The original recipe used five separate HTTP requests, along with conditional logic, monitoring, error handling, and logging.
+I compared two Workato recipes performing the same five REST API operations:
 
-The optimized recipe performs the same five external REST API operations through a consolidated Python implementation.
+- **Baseline:** Separate HTTP connector actions with monitoring, conditional logic, and logging.
+- **Optimized:** Consolidated Python implementation handling the API requests, validation, and error processing.
 
 ### Key Results
 
-- **88.2% fewer Workato tasks:** 17 → 2 per successful execution.
-- **91.3% fewer configured workflow actions:** 23 → 2.
-- **15 Workato tasks eliminated per execution.**
-- Both compared jobs completed successfully.
+- **60% reduction in Workato tasks:** 5 → 2 per successful execution.
+- **91.3% reduction in configured actions:** 23 → 2.
+- Both workflows completed successfully.
 
 ## The Problem
 
-The baseline Workato recipe retrieves related information from five REST API endpoints.
+The original recipe used five HTTP connector actions alongside monitoring, error handling, and logging.
 
-Although the integration works, its multiple HTTP connector actions and supporting monitoring and logging logic increase the number of steps required to maintain and execute the workflow.
+Although functional, the workflow contained **23 configured actions** and consumed **5 Workato tasks** in the observed successful execution.
 
-The original implementation contained **23 configured workflow actions** and consumed **17 Workato tasks** during the observed successful execution.
+Complex recipes increase maintenance effort, while unnecessary task consumption can increase usage-based costs.
 
-This matters because unnecessary task consumption can increase usage-based costs in task-metered Workato environments, particularly for recipes that execute frequently.
+## The Solution
 
-## Public API Operations
+I consolidated the five API operations and their supporting request-handling logic into Python.
 
-The example uses the public read-only [JSONPlaceholder API](https://jsonplaceholder.typicode.com/).
+The optimized recipe performs the same five external GET requests while centralizing:
 
-| Logical Call | GET Endpoint |
+- HTTP requests and JSON response processing.
+- Input validation and response verification.
+- Retry handling for transient API failures.
+- Structured outputs and error reporting.
+
+### API Endpoints
+
+**Public API:** [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+
+| Operation | Endpoint |
 |---|---|
-| User | `/users/1` |
-| Posts | `/posts?userId=1` |
-| Comments | `/posts/1/comments` |
-| Todos | `/users/1/todos` |
-| Albums | `/users/1/albums` |
+| User | `GET /users/1` |
+| Posts | `GET /posts?userId=1` |
+| Comments | `GET /posts/1/comments` |
+| Todos | `GET /users/1/todos` |
+| Albums | `GET /users/1/albums` |
 
-Both implementations execute the same five logical API requests.
-
-The optimization reduces Workato actions and task consumption, not the number of external API operations.
-
-## Baseline Design — Multi-step HTTP Workflow
-
-The original recipe uses individual HTTP connector actions to perform each API request, with additional monitoring, conditional processing, and logging.
-
-### Workflow
-
-```text
-Scheduler
-    |
-    v
-HTTP GET User
-    |
-    v
-Validate User Name
-    |
-    v
-HTTP GET Posts
-    |
-    v
-HTTP GET Comments
-    |
-    v
-HTTP GET Todos
-    |
-    v
-HTTP GET Albums
-    |
-    v
-Monitoring, Error Handling & Logging
-```
-
-The actual recipe includes Monitor blocks, retry/no-retry branches, and supporting logging actions.
-
-**Baseline measurements:**
-
-- 23 configured workflow actions.
-- 17 Workato tasks consumed in the observed successful job.
-- 910 ms observed execution duration.
-
-Not every configured action runs during every execution. Conditional and error-handling branches may execute only when their conditions are met.
-
-## Optimized Design — Consolidated Python
-
-I redesigned the integration to consolidate the five API calls and their supporting request-handling logic into Python.
-
-### Workflow
-
-```text
-Scheduler
-    |
-    v
-Python: Fetch and Validate Related API Resources
-    |
-    v
-Structured Output
-```
-
-The optimized implementation uses [optimized.py](optimized.py) to:
-
-1. Validate the provided user and post IDs.
-2. Execute five sequential REST API requests.
-3. Check HTTP response status codes.
-4. Retry selected transient failures.
-5. Parse and validate JSON responses.
-6. Verify the expected user information.
-7. Collect the returned resource counts.
-8. Return a structured result containing operation status and error information.
-
-**Optimized measurements:**
-
-- 2 configured workflow actions.
-- 2 Workato tasks consumed in the observed successful job.
-- 897 ms observed execution duration.
-
-### Example Input
-
-```json
-{
-  "user_id": 1,
-  "post_id": 1,
-  "expected_name": "Leanne Graham"
-}
-```
-
-### Output Fields
-
-The Python implementation returns structured fields including:
-
-- `success`
-- `name_matches`
-- `user_name`
-- `posts_count`
-- `comments_count`
-- `todos_count`
-- `albums_count`
-- `completed_operations`
-- `error_count`
-- `error_message`
-- `summary`
-- `http_attempts_on_success`
+Both implementations perform five logical API requests. The optimization reduces Workato actions and tasks, not the number of external API operations.
 
 ## Results — November 4, 2026
 
-Both the baseline and optimized recipes completed successfully.
-
-| Measurement | Multi-step HTTP | Consolidated Python |
+| Measurement | Baseline HTTP | Optimized Python |
 |---|---:|---:|
-| Job status | Successful | Successful |
-| Configured workflow actions | **23** | **2** |
-| Workflow actions eliminated | — | **21** |
-| Workflow action reduction | — | **91.3%** |
-| Workato tasks consumed | **17** | **2** |
-| Workato tasks eliminated | — | **15** |
-| Task consumption reduction | — | **88.2%** |
+| Execution status | Successful | Successful |
+| Configured actions | **23** | **2** |
+| Actions eliminated | — | **21 (91.3%)** |
+| Workato tasks consumed | **5** | **2** |
+| Tasks eliminated | — | **3 (60%)** |
 | Job duration | **910 ms** | **897 ms** |
 
-### Result 1 — 88.2% Reduction in Task Consumption
+### Business Impact
 
-The optimized recipe reduced Workato task usage from 17 tasks to 2 tasks per observed successful execution.
+**Reduced Workato task consumption by 60%, lowering task-based resource usage and supporting cost efficiency in task-metered environments.**
 
-This represents **15 fewer Workato tasks per execution**.
+At higher execution volumes, the savings accumulate:
 
-For Workato environments with task-based billing, this reduction improves resource efficiency and can lower usage-based costs.
+| Monthly Executions | Original Tasks | Optimized Tasks | Tasks Saved |
+|---|---:|---:|---:|
+| 1,000 | 5,000 | 2,000 | **3,000** |
+| 10,000 | 50,000 | 20,000 | **30,000** |
+| 100,000 | 500,000 | 200,000 | **300,000** |
 
-### Result 2 — 91.3% Simpler Workflow
+These are projections based on the observed task counts. Actual financial savings depend on the Workato billing agreement.
 
-The original workflow contained 23 configured actions.
+### Successful Execution
 
-The optimized design contains 2.
+The optimized Python output reported:
 
-By eliminating 21 actions, the recipe becomes easier to navigate and reduces repetitive configuration.
-
-### Result 3 — Successful API Processing
-
-The optimized execution produced the following results:
-
-| Validation | Observed Result |
+| Validation | Result |
 |---|---|
 | `success` | `true` |
 | `name_matches` | `true` |
 | `completed_operations` | `5` |
 | `error_count` | `0` |
-| Posts | 10 |
-| Comments | 5 |
-| Todos | 20 |
-| Albums | 10 |
+| Posts retrieved | 10 |
+| Comments retrieved | 5 |
+| Todos retrieved | 20 |
+| Albums retrieved | 10 |
 
-The optimized workflow completed all five intended API operations successfully.
+All five intended API operations completed successfully in the optimized execution.
 
-The baseline was also successful. A detailed endpoint-by-endpoint comparison of all response fields has not been separately documented.
+The baseline execution also succeeded, although complete endpoint-by-endpoint output equivalence has not been separately documented.
 
-## Business Impact — Cost Efficiency at Scale
+## Workato Implementation
 
-Reducing task consumption becomes increasingly valuable as integration volume grows.
+### Baseline — Multi-step HTTP
 
-Assuming the observed task counts remain consistent:
+The original recipe contains separate HTTP actions, monitoring blocks, conditional branches, and logging.
 
-| Monthly Executions | Original Tasks | Optimized Tasks | Tasks Saved |
-|---|---:|---:|---:|
-| 1,000 | 17,000 | 2,000 | **15,000** |
-| 10,000 | 170,000 | 20,000 | **150,000** |
-| 100,000 | 1,700,000 | 200,000 | **1,500,000** |
+![Baseline workflow — Part 1](screenshots/01-http-baseline-top.png)
 
-At 10,000 executions per month, this design would consume **150,000 fewer Workato tasks** than the original implementation.
+![Baseline workflow — Part 2](screenshots/02-http-baseline-middle.png)
 
-These are projected task savings based on the observed executions. Actual monetary savings depend on the applicable Workato contract and billing model.
+![Baseline workflow — Part 3](screenshots/03-http-baseline-lower-middle.png)
 
-## Error Handling
+![Baseline workflow — Part 4](screenshots/04-http-baseline-bottom.png)
 
-The consolidated Python implementation includes request validation and HTTP error handling.
+### Optimized — Consolidated Python
 
-### Implemented Behavior
+The optimized recipe uses Python to execute and validate the five API requests while reducing the configured workflow to two actions.
 
-- Rejects invalid, non-positive user or post IDs.
-- Uses an 8-second timeout per request attempt.
-- Allows up to two attempts for selected transient errors.
-- Handles connection failures and timeouts.
-- Retries HTTP 429, 500, 502, 503, and 504 responses within the configured limit.
-- Stops execution of the request sequence on non-retryable errors or malformed JSON.
-- Returns structured error information.
-- Avoids logging raw API response bodies or credentials.
+![Optimized Python workflow](screenshots/05-python-optimized.png)
 
-### Workato Error Propagation
+### Execution Evidence
 
-The Python implementation can return `success=false` when an API operation fails.
+**Baseline — 5 tasks, 910 ms**
 
-However, returning a structured error does not automatically mark the Workato job as failed.
-
-For production use, the recipe should evaluate the Python result and explicitly raise or escalate failures where appropriate.
-
-The consolidated design also moves much of the step-level observability into Python, so logging and error reporting require careful consideration.
-
-## Design Tradeoffs
-
-| Consideration | Multi-step HTTP | Consolidated Python |
-|---|---|---|
-| Workato task consumption | Higher | Lower |
-| Recipe action count | 23 | 2 |
-| API requests | 5 | 5 |
-| Request handling | Distributed | Centralized |
-| Error handling | Workato Monitor branches | Python handling and structured results |
-| Troubleshooting | Individual Workato actions | Python logs and structured output |
-| Maintenance | Visual configuration | Python code maintenance |
-
-The optimal approach depends on integration complexity, observability requirements, and maintainability.
-
-Python consolidation is particularly useful when repeated API operations and supporting logic create unnecessary Workato tasks.
-
-## Screenshot Evidence
-
-### Baseline — Five HTTP Requests with Monitoring and Logging
-
-**Section 1 — Beginning of the original workflow**
-
-![Baseline beginning](screenshots/01-http-baseline-top.png)
-
-**Section 2 — Additional HTTP actions and monitoring**
-
-![Baseline middle](screenshots/02-http-baseline-middle.png)
-
-**Section 3 — Conditional processing and error handling**
-
-![Baseline lower middle](screenshots/03-http-baseline-lower-middle.png)
-
-**Section 4 — Remaining actions and logging**
-
-![Baseline final portion](screenshots/04-http-baseline-bottom.png)
-
-### Optimized — Consolidated Python Workflow
-
-The optimized design replaces the repeated API actions and supporting logic with a streamlined Python-based implementation.
-
-![Optimized Python recipe](screenshots/05-python-optimized.png)
-
-### Workato Job Execution Results
-
-**Original — 17 tasks, 910 ms**
-
-![Baseline successful job — 17 tasks](screenshots/06-http-job-result.png)
+![Baseline successful execution](screenshots/06-http-job-result.png)
 
 **Optimized — 2 tasks, 897 ms**
 
-![Optimized successful job — 2 tasks](screenshots/07-python-job-result.png)
+![Optimized successful execution](screenshots/07-python-job-result.png)
 
-The duration measurements come from one successful execution of each design. The 13 ms difference should not be interpreted as a statistically significant performance improvement.
+The execution times represent one observed successful run of each design, not a statistically significant speed comparison.
 
-## Project Files
+## Source Code & Recipe Exports
 
-- [optimized.py](optimized.py) — Consolidated Python implementation.
-- [screenshots/](screenshots/) — Before-and-after recipe screenshots and Workato job results.
-- [Benchmarks](../docs/BENCHMARKS.md) — Measurement details and benchmark interpretation.
+- [Python Implementation](optimized.py) — Consolidated REST API requests, validation, and error handling.
+- [Baseline Workato Recipe](recipes/baseline.recipe.json) — Original HTTP-based workflow.
+- [Optimized Workato Recipe](recipes/optimized.recipe.json) — Python-based optimized workflow.
+- [Benchmark Documentation](../docs/BENCHMARKS.md) — Measurement details.
+
+Recipe exports are provided for reference and require environment-specific configuration before reuse.
 
 ## Key Takeaway
 
-**Reduced Workato task consumption by 88.2% and configured workflow actions by 91.3%, while successfully completing the same five external REST API operations.**
+**Reduced Workato task consumption by 60% and configured workflow actions by 91.3%, while successfully executing the same five REST API operations.**
 
-This case study demonstrates how consolidating repetitive integration logic can improve platform resource efficiency, simplify recipe design, and reduce task-metered usage costs.
+This demonstrates how thoughtful Workato recipe design can improve task efficiency, reduce unnecessary workflow complexity, and support lower usage-based costs.
 
 ---
 
